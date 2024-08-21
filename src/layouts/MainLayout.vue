@@ -32,7 +32,6 @@ import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import { useQuasar } from 'quasar'
 const $q = useQuasar()
-
 defineOptions({
   name: 'MainLayout'
 })
