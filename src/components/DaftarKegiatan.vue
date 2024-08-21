@@ -2,10 +2,10 @@
   <q-layout view="lHh LpR fFf">
     <q-header class="bg-white text-black" :class="{ 'body--dark': $q.dark.isActive }"  bordered>
       <q-toolbar>
-        <q-btn dense flat round icon="arrow_back" @click="view.goBack" v-if="view.view !== 'surveys'" />
+        <q-btn flat round icon="arrow_back" @click="view.goBack" v-if="view.view !== 'surveys'" />
         <q-toolbar-title class="text-center text-blue-10 text-bold">{{ view.title }}</q-toolbar-title>
-        <q-btn icon="more_vert" v-if="view.view !== 'kuesioner'" flat dense rounded></q-btn>
-        <q-btn icon="menu" v-else-if="view.view === 'kuesioner'" flat dense rounded @click="view.toggleLeftDrawer"></q-btn>
+        <q-btn icon="more_vert" v-if="view.view !== 'kuesioner'" flat rounded></q-btn>
+        <q-btn icon="menu" v-else-if="view.view === 'kuesioner'" flat rounded @click="view.toggleLeftDrawer"></q-btn>
       </q-toolbar>
     </q-header>
     <br>
@@ -50,11 +50,11 @@
               color="blue-10"
               external-label
             >
-            <q-fab-action external-label  color="warning" icon="palette" label="Info Wana Assignment" label-position="left" dense/>
-            <q-fab-action external-label  color="warning" icon="sort_by_alpha" label="Urutkan" label-position="left" dense/>
-            <q-fab-action external-label  color="warning" icon="filter_alt" label="Filter by Status" label-position="left" dense/>
-            <q-fab-action external-label color="warning" icon="done" label="Tandai wilayah telah selesai" label-position="left" dense/>
-            <q-fab-action external-label  color="grey" icon="add" label="Tambah Assignment" label-position="left" dense/>
+            <q-fab-action external-label  color="warning" icon="palette" label="Info Wana Assignment" label-position="left" />
+            <q-fab-action external-label  color="warning" icon="sort_by_alpha" label="Urutkan" label-position="left" />
+            <q-fab-action external-label  color="warning" icon="filter_alt" label="Filter by Status" label-position="left" />
+            <q-fab-action external-label color="warning" icon="done" label="Tandai wilayah telah selesai" label-position="left" />
+            <q-fab-action external-label  color="grey" icon="add" label="Tambah Assignment" label-position="left" />
             </q-fab>
           </q-page-sticky>
       </q-page>
@@ -67,9 +67,9 @@
               color="blue-10"
               external-label
             >
-            <q-fab-action external-label  color="warning" icon="settings_backup_restore" label="Muat ulang" label-position="left" dense/>
-            <q-fab-action external-label  color="orange" icon="gps_fixed" label="Lokasi" label-position="left" dense/>
-            <q-fab-action external-label color="positive" icon="done" label="Approval" label-position="left" dense @click="toggleApproval"/>
+            <q-fab-action external-label  color="warning" icon="settings_backup_restore" label="Muat ulang" label-position="left" />
+            <q-fab-action external-label  color="orange" icon="gps_fixed" label="Lokasi" label-position="left" />
+            <q-fab-action external-label color="positive" icon="done" label="Approval" label-position="left"  @click="toggleApproval"/>
             </q-fab>
           </q-page-sticky>
           <q-dialog v-model="approval">
