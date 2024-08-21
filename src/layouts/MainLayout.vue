@@ -35,7 +35,6 @@ const $q = useQuasar()
 defineOptions({
   name: 'MainLayout'
 })
-
 const linksList = [
   {
     title: 'Docs',
