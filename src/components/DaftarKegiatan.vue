@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh LpR fFf">
-    <q-header class="bg-white text-black" bordered>
+    <q-header class="bg-white text-black" :class="{ 'body--dark': $q.dark.isActive }"  bordered>
       <q-toolbar>
         <q-btn dense flat round icon="arrow_back" @click="view.goBack" v-if="view.view !== 'surveys'" />
         <q-toolbar-title class="text-center text-blue-10 text-bold">{{ view.title }}</q-toolbar-title>

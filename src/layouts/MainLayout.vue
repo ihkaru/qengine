@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" :class="{ 'body--dark': $q.dark.isActive }" >
     <!-- <q-header>
       <q-toolbar>
         <q-btn
@@ -30,7 +30,8 @@
 <script setup>
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
-
+import { useQuasar } from 'quasar'
+const $q = useQuasar()
 defineOptions({
   name: 'MainLayout'
 })

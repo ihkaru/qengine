@@ -1,8 +1,15 @@
 <template>
     <q-page>
-      <q-header dense class="bg-white text-black" bordered>
+      <q-header dense class="bg-white text-black" bordered :class="{ 'body--dark': $q.dark.isActive }">
         <q-toolbar>
-          <q-toolbar-title style="font-size: medium; padding-left: 20px;" class="text-black text-bold"><div class="my-0">SAKERNAS AGS 2024 - PENDATAAN</div><div class="m-0" style="font-size: x-small;">FormEngine-0.0.1 🚀</div></q-toolbar-title>
+          <q-toolbar-title style="font-size: medium; padding-left: 20px;padding-top: 15px;padding-bottom: 15px;" class="text-black text-bold"><div class="my-0">SAKERNAS AGS 2024 - PENDATAAN</div><div class="m-0" style="font-size: x-small;">FormEngine-0.0.1 🚀</div></q-toolbar-title>
+
+          <q-toggle
+            v-model="$q.dark.isActive"
+            checked-icon="dark_mode"
+            unchecked-icon="light_mode"
+            color="black"
+          />
           <q-btn icon="menu" flat dense rounded @click="view.toggleLeftDrawer"></q-btn>
         </q-toolbar>
       </q-header>
@@ -34,6 +41,8 @@ import 'survey-core/defaultV2.min.css';
 import { useViewStore } from 'src/stores/view';
 import { Model } from 'survey-core';
 import EssentialLink from 'components/EssentialLink.vue'
+import { useQuasar } from 'quasar'
+const $q = useQuasar()
 
 const view = useViewStore();
 // const SURVEY_ID = 1;
