@@ -52,6 +52,7 @@ const handleBackButton = function(event) {
         // User canceled, do nothing
       });
     }
+
 window.addEventListener('beforeunload', handleBackButton);
 const linksList = [
   {
