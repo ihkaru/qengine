@@ -1,4 +1,4 @@
-name: Publish Backend to Dev
+name: Publish Frontend to Dev
 on:
   push:
     branches:

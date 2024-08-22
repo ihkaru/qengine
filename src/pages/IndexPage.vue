@@ -1,7 +1,7 @@
 <template>
   <q-page class="flex flex-center">
     <!-- <SurveyForm/> -->
-     <DaftarKegiatan/>
+     <!-- <DaftarKegiatan/> -->
   </q-page>
 </template>
 

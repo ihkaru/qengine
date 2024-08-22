@@ -33,8 +33,8 @@ module.exports = configure(function (/* ctx */) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      // 'mdi-v7',
-      // 'fontawesome-v6',
+      'mdi-v7',
+      'fontawesome-v6',
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
@@ -60,7 +60,11 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: require('dotenv').config({
+        path: process.env.NODE_ENV === 'production'
+          ? '.env.production'
+          : '.env.development'
+      }).parsed,
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
