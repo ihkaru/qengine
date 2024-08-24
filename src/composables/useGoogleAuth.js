@@ -1,7 +1,11 @@
 import { ref } from 'vue'
 import axios from 'axios'
+axios.defaults.headers.get['Access-Control-Allow-Origin']='*';
 const api = axios.create({
-  baseURL: process.env.QENV_API_URL
+  baseURL: process.env.QENV_API_URL,
+  'headers': {
+    'Access-Control-Allow-Origin' : '*'
+  }
 })
 export function useGoogleAuth() {
   const user = ref(null)
@@ -9,7 +13,7 @@ export function useGoogleAuth() {
 
   const loginWithGoogle = async () => {
     try {
-      const response = await api.get('/api/auth/google')
+      const response = await api.get('/auth/google')
       window.location.href = response.data
     } catch (e) {
       error.value = 'Failed to initiate Google login'
