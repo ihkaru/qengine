@@ -23,7 +23,7 @@ export function useGoogleAuth() {
 
   const handleGoogleCallback = async (code) => {
     try {
-      const response = await api.get(`/api/auth/google/callback?code=${code}`)
+      const response = await api.get(`/auth/google/callback?code=${code}`)
       user.value = response.data
       localStorage.setItem('token', response.data.access_token)
     } catch (e) {
