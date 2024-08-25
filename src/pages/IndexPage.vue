@@ -64,6 +64,7 @@
       <GoogleSignInButton
         @success="handleLoginSuccess"
         @error="handleLoginError"
+        ux-mode="redirect"
       ></GoogleSignInButton>
 
       <p class="text-caption text-center">
