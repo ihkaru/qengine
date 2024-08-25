@@ -1,7 +1,7 @@
 .DS_Store
 .thumbs.db
 node_modules
-
+dist.zip
 # Quasar core related directories
 .quasar
 /quasar.config.*.temporary.compiled*
