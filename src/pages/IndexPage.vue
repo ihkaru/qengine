@@ -60,12 +60,11 @@
         </q-carousel-slide>
       </q-carousel>
 
-      <q-btn
-        color="primary"
-        class="full-width q-py-sm q-mb-md"
-        label="Login Sekarang"
-        @click="loginWithGoogle"
-      />
+      <q-btn v-if="!user" @click="handleLogin" label="Login Sekarang" color="primary" class="full-width q-py-sm q-mb-md" />
+      <div v-else>
+        <p>Welcome, {{ user.name }}!</p>
+        <q-btn @click="handleLogout" label="Logout" />
+      </div>
 
       <p class="text-caption text-center">
         Dengan melakukan login, anda setuju dengan
@@ -81,9 +80,25 @@ import { ref } from 'vue'
 const slide = ref(1)
 // import SurveyForm from 'components/SurveyForm.vue'
 import DaftarKegiatan from 'components/DaftarKegiatan.vue'
-import { useGoogleAuth } from 'src/composables/useGoogleAuth'
+// import { useGoogleAuth } from 'src/composables/useGoogleAuth'
 
-const { loginWithGoogle } = useGoogleAuth()
+// const { loginWithGoogle } = useGoogleAuth()
+
+import { useGoogleLogin } from 'src/composables/useGoogleLogin'
+
+const { user, login, logout } = useGoogleLogin()
+
+const handleLogin = async () => {
+  try {
+    await login()
+  } catch (err) {
+    console.error('Login failed:', err)
+  }
+}
+
+const handleLogout = () => {
+  logout()}
+
 defineOptions({
   name: 'IndexPage'
 });

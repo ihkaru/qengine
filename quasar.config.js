@@ -22,8 +22,11 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
 
-      'axios','survey'
+      'axios','survey','google-oauth'
     ],
+    htmlVariables: {
+      googleClientId: '617974935475-ukuhr26gmu7q5kau7iv0f7jf04ar7sp3.apps.googleusercontent.com'
+    },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [

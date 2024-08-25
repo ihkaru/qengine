@@ -10,7 +10,7 @@
           color="blue"
           icon="fab fa-google"
           label="Login dengan Google"
-          @click="loginWithGoogle"
+
         />
       </q-card-section>
     </q-card>
@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { useGoogleAuth } from 'src/composables/useGoogleAuth'
+// import { useGoogleAuth } from 'src/composables/useGoogleAuth'
 
 const { loginWithGoogle } = useGoogleAuth()
 </script>
