@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 
 const clientId = process.env.GOOGLE_CLIENT_ID || '';
-
 console.log('Client ID:', clientId)
 export function useGoogleLogin() {
   const user = ref(null)
