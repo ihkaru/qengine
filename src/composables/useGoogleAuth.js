@@ -10,7 +10,6 @@ const api = axios.create({
 export function useGoogleAuth() {
   const user = ref(null)
   const error = ref(null)
-
   const loginWithGoogle = async () => {
     try {
       const response = await api.get('/auth/google')
