@@ -60,11 +60,11 @@
         </q-carousel-slide>
       </q-carousel>
 
-      <q-btn v-if="!user" @click="handleLogin" label="Login Sekarang" color="primary" class="full-width q-py-sm q-mb-md" />
-      <div v-else>
-        <p>Welcome, {{ user.name }}!</p>
-        <q-btn @click="handleLogout" label="Logout" />
-      </div>
+      <q-btn label="Login Sekarang" color="primary" class="full-width q-py-sm q-mb-md" />
+      <GoogleSignInButton
+        @success="handleLoginSuccess"
+        @error="handleLoginError"
+      ></GoogleSignInButton>
 
       <p class="text-caption text-center">
         Dengan melakukan login, anda setuju dengan
@@ -74,30 +74,25 @@
   </q-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-
-const slide = ref(1)
-// import SurveyForm from 'components/SurveyForm.vue'
-import DaftarKegiatan from 'components/DaftarKegiatan.vue'
-// import { useGoogleAuth } from 'src/composables/useGoogleAuth'
-
-// const { loginWithGoogle } = useGoogleAuth()
-
 import { useGoogleLogin } from 'src/composables/useGoogleLogin'
 
-const { user, login, logout } = useGoogleLogin()
+const slide = ref(1)
+import {
+  GoogleSignInButton
+} from "vue3-google-signin";
 
-const handleLogin = async () => {
-  try {
-    await login()
-  } catch (err) {
-    console.error('Login failed:', err)
-  }
-}
+// handle success event
+const handleLoginSuccess = (response) => {
+  const { credential } = response;
+  console.log("Access Token", credential);
+};
 
-const handleLogout = () => {
-  logout()}
+// handle an error event
+const handleLoginError = () => {
+  console.error("Login failed");
+};
 
 defineOptions({
   name: 'IndexPage'
