@@ -25,7 +25,6 @@ export function useGoogleLogin() {
       })
     })
   }
-
   const handleCredentialResponse = (response) => {
     const { credential } = response
     // Decode the credential to get user information
