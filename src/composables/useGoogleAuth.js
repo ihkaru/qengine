@@ -1,12 +1,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
-// axios.defaults.headers.get['Access-Control-Allow-Origin']='*';
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.defaults.headers["Access-Control-Allow-Origin"] = "*";
+axios.defaults.withCredentials = true
 const api = axios.create({
-  baseURL: process.env.QENV_API_URL,
-  'headers': {
-    'Access-Control-Allow-Origin' : '*',
-    'Accept' : 'application/json'
-  }
+  baseURL: process.env.QENV_API_URL
 })
 
 export function useGoogleAuth() {
