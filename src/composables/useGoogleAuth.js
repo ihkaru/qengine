@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import axios from 'axios'
 axios.defaults.headers.get['Access-Control-Allow-Origin']='*';
-
 const api = axios.create({
   baseURL: process.env.QENV_API_URL,
   'headers': {
