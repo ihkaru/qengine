@@ -7,6 +7,7 @@ const api = axios.create({
     'Access-Control-Allow-Origin' : '*'
   }
 })
+
 export function useGoogleAuth() {
   const user = ref(null)
   const error = ref(null)
