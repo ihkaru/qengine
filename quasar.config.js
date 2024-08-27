@@ -21,7 +21,7 @@ module.exports = configure(function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      'axios','survey','google-oauth','google-signin'
+      'axios','survey','google-oauth','google-signin','local-forage'
     ],
     htmlVariables: {
       googleClientId: '617974935475-ukuhr26gmu7q5kau7iv0f7jf04ar7sp3.apps.googleusercontent.com'
