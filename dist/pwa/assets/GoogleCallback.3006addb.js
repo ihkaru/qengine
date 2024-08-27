@@ -1,1 +1,0 @@
-import{Q as e}from"./QPage.93010e0d.js";import{e as a,j as o,q as t,m as s}from"./index.9de547cf.js";import"./render.19d9bebf.js";const r=s("p",null,"Processing login...",-1),m={__name:"GoogleCallback",setup(c){return(l,n)=>(a(),o(e,{class:"flex flex-center"},{default:t(()=>[r]),_:1}))}};export{m as default};
