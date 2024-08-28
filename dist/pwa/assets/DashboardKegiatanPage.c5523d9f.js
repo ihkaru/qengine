@@ -1,1 +1,0 @@
-import{Q as e}from"./QPage.05da7856.js";import{_ as a}from"./plugin-vue_export-helper.21dcd24c.js";import{e as r,j as t,q as o,V as s}from"./index.8a4acb66.js";import"./render.90f3c4cf.js";const c={};function f(n,_){return r(),t(e,{class:"flex flex-center"},{default:o(()=>[s(" Dashboard Kegiatan Page ")]),_:1})}var p=a(c,[["render",f]]);export{p as default};

@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <q-tab-panels v-model="panel" animated swipeable>
+    <q-tab-panels v-model="panel" animated swipeable infinite>
       <q-tab-panel name="beranda">
         <div class="text-h6">Halo, {{activeUser.name}}!</div>
         <div class="text-subtitle2">Selamat datang di FASIH</div>
