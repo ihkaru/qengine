@@ -1,10 +1,6 @@
 <template>
-  <!-- <q-page class="flex flex-center"> -->
-    <!-- <SurveyForm/> -->
-     <!-- <DaftarKegiatan/> -->
-  <!-- </q-page> -->
   <q-page class="flex flex-center" flat>
-    <h4>Check login status</h4>
+
   </q-page>
 </template>
 
@@ -12,13 +8,17 @@
 import { ref,onMounted } from 'vue'
 import useAuth from 'src/composables/useAuth'
 import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
+const $q = useQuasar()
 const router = useRouter();
 
 const { login,token,redirectIfTokenExpired } = useAuth()
 
 
 onMounted( async ()=>{
+  $q.loading.show();
   let redirectUrl = await redirectIfTokenExpired();
+  $q.loading.hide();
   router.push(redirectUrl);
 })
 

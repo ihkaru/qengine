@@ -29,9 +29,8 @@
           <div class="col-8">
             <div class="text-h6">Daftar Survei</div>
           </div>
-          <div class="col-4 text-right flex">
+          <div class="col-4 text-right">
             <q-btn color="primary" label="SYNC SURVEI" />
-            <q-btn color="primary" label="LOGOUT" @click="handleLogout" />
           </div>
         </div>
 
@@ -52,7 +51,72 @@
         <h4>Bantuan</h4>
       </q-tab-panel>
       <q-tab-panel name="pengaturan">
-        <h4>Pengaturan</h4>
+        <div class="text-h6 q-mb-md">Pengaturan</div>
+
+        <q-card class="q-mb-md">
+          <q-item>
+            <q-item-section avatar>
+              <q-avatar color="primary" text-color="white">
+                J
+              </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{activeUser.name}}</q-item-label>
+              <q-item-label caption>{{activeUser.email}}</q-item-label>
+              <q-item-label caption>session expired: {{formattedTokenExpiredDate}}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-card>
+
+        <q-list bordered separator>
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="smartphone" color="primary" />
+            </q-item-section>
+            <q-item-section>Sistem</q-item-section>
+            <q-item-section side>
+              <q-icon name="chevron_right" color="grey" />
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="backup" color="primary" />
+            </q-item-section>
+            <q-item-section>Backup</q-item-section>
+            <q-item-section side>
+              <q-icon name="chevron_right" color="grey" />
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="policy" color="primary" />
+            </q-item-section>
+            <q-item-section>Kebijakan Privasi</q-item-section>
+            <q-item-section side>
+              <q-icon name="chevron_right" color="grey" />
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="help" color="primary" />
+            </q-item-section>
+            <q-item-section>FAQ Aplikasi</q-item-section>
+            <q-item-section side>
+              <q-icon name="chevron_right" color="grey" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-btn
+          class="full-width q-mt-lg"
+          color="primary"
+          outline
+          label="LOGOUT"
+          @click="handleLogout"
+        />
       </q-tab-panel>
     </q-tab-panels>
 
@@ -69,17 +133,30 @@
 </template>
 
 <script setup>
+import { QSpinnerGears, useQuasar } from 'quasar';
 import useAuth from 'src/composables/useAuth';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router'
-const {user,logout,redirectIfTokenExpired} = useAuth();
+const {user,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,isTokenExpired} = useAuth();
 const activeUser = ref({});
 const router = useRouter();
-
+const formattedTokenExpiredDate = ref('');
+const $q = useQuasar();
 const panel = ref('beranda');
 
 onMounted(async ()=>{
+  $q.loading.show({
+          spinner: QSpinnerGears,
+          spinnerColor: 'teal-5',
+          message: 'Memeriksa..',
+          messageColor: 'black',
+          backgroundColor: 'white'
+        });
   activeUser.value = await user();
+  formattedTokenExpiredDate.value = await getFormattedTokenExpirationDate();
+  console.log(isTokenExpired());
+  // if(isTokenExpired()) router.push('/login');
+  $q.loading.hide();
   console.log('this is user active',activeUser.value);
 })
 const handleLogout = async ()=>{

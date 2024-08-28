@@ -79,19 +79,28 @@ import { ref,onMounted } from 'vue'
 import useAuth from 'src/composables/useAuth'
 import {GoogleSignInButton,decodeCredential} from "vue3-google-signin";
 import { useRouter } from 'vue-router'
+import { QSpinnerGears, QSpinnerPie, useQuasar } from 'quasar';
+const $q = useQuasar()
 
 const slide = ref(1)
-const { login,token,redirectIfTokenExpired,setUser } = useAuth()
+const { login,token,redirectIfTokenExpired,setUser,isTokenExpired} = useAuth()
 const router = useRouter()
 
 onMounted( async ()=>{
   console.log("This is token value:", await redirectIfTokenExpired());
-  if(token.value) router.push('/home/beranda');
+  if(!isTokenExpired()) router.push('/home/beranda');
 })
 
 
 // handle success event
 const handleLoginSuccess = async (response) => {
+  $q.loading.show({
+          spinner: QSpinnerGears,
+          spinnerColor: 'teal-5',
+          message: 'Mohon tunggu..',
+          messageColor: 'black',
+          backgroundColor: 'white'
+        })
   const { credential } = response;
   const decodedCredential = decodeCredential(credential);
   console.log("User:", decodedCredential);
@@ -101,6 +110,7 @@ const handleLoginSuccess = async (response) => {
   // console.log('idb profile', await idb.getProfile(decodedCredential.id))
   console.log("Token",token.value)
   console.log( response);
+  $q.loading.hide()
   router.push('/home/beranda');
 };
 

@@ -94,7 +94,10 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
       config: {
-        dark: 'auto'
+        dark: 'auto',
+        loading: {
+          'message': 'Mohon tunggu'
+        }
       },
 
       // iconSet: 'material-icons', // Quasar icon set
@@ -108,7 +111,7 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: ['Loading']
     },
 
     // animations: 'all', // --- includes all animations

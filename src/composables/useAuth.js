@@ -35,6 +35,37 @@ export default function useAuth() {
     }
   }
 
+  const getTokenExpirationDate = (token) => {
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded.exp === undefined) {
+        return null;
+      }
+
+      const date = new Date(0); // The 0 sets the date to the epoch
+      date.setUTCSeconds(decoded.exp);
+      return date;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  }
+
+  const getFormattedTokenExpirationDate = async () => {
+    return formatDate(getTokenExpirationDate(await localForage.getItem('token')))
+  }
+
   watch(token, (newToken) => {
     if (newToken) {
       localForage.setItem('token', newToken)
@@ -85,7 +116,7 @@ export default function useAuth() {
     token,
     login,logout,
     getToken,
-    redirectIfTokenExpired,
+    redirectIfTokenExpired, getFormattedTokenExpirationDate,isTokenExpired,
     user,setUser
   }
 }
