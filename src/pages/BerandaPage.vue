@@ -24,7 +24,6 @@
             </div>
           </q-card-section>
         </q-card>
-
         <div class="row q-mt-md">
           <div class="col-8">
             <div class="text-h6">Daftar Survei</div>
