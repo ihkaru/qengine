@@ -1,1 +1,0 @@
-import{b as e}from"./index.dea5ae4d.js";import{m as t}from"./index.es.a83a9267.js";const r="617974935475-ukuhr26gmu7q5kau7iv0f7jf04ar7sp3.apps.googleusercontent.com";var s=e(({app:o})=>{o.use(t,{clientId:r})});export{s as default};
