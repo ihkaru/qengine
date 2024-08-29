@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <q-tab-panels v-model="panel" animated swipeable infinite>
+    <q-tab-panels v-model="panel" animated swipeable class="full-height" style="min-height: 100%;">
       <q-tab-panel name="beranda">
         <div class="text-h6">Halo, {{activeUser.name}}!</div>
         <div class="text-subtitle2">Selamat datang di FASIH</div>
@@ -136,12 +136,25 @@ import { QSpinnerGears, useQuasar } from 'quasar';
 import useAuth from 'src/composables/useAuth';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router'
+import { useExitHandler } from 'src/composables/useExitHandler'
+
 const {user,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,isTokenExpired} = useAuth();
 const activeUser = ref({});
 const router = useRouter();
 const formattedTokenExpiredDate = ref('');
 const $q = useQuasar();
 const panel = ref('beranda');
+const canGoBack = ref(false)
+const { handleExit } = useExitHandler()
+
+const handleBackButton = (event) => {
+  if (canGoBack.value) {
+    router.back()
+  } else {
+    handleExit()
+  }
+}
+
 
 onMounted(async ()=>{
   $q.loading.show({
