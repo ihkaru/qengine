@@ -14,7 +14,7 @@
         color="white"
         text-color="blue"
         unelevated
-        to="/"
+        to="/home/beranda"
         label="Go Home"
         no-caps
       />

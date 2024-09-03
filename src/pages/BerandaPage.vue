@@ -19,18 +19,18 @@
           <q-card-section class="row items-center q-pb-none">
             <div class="col-4 text-center">
               <q-icon name="assignment" size="sm" color="primary" />
-              <div class="text-caption">Survei</div>
-              <div class="text-h6">1</div>
+              <div class="text-caption">Kegiatan</div>
+              <div class="text-h6">{{rekapitulasi_kegiatan?.kegiatan}}</div>
             </div>
             <div class="col-4 text-center">
               <q-icon name="schedule" size="sm" color="primary" />
-              <div class="text-caption">Periode</div>
-              <div class="text-h6">1</div>
+              <div class="text-caption">Kegiatan Berjalan</div>
+              <div class="text-h6">{{rekapitulasi_kegiatan?.periode}}</div>
             </div>
             <div class="col-4 text-center">
               <q-icon name="group" size="sm" color="primary" />
               <div class="text-caption">Assignment</div>
-              <div class="text-h6">30</div>
+              <div class="text-h6">{{rekapitulasi_kegiatan?.assignment}}</div>
             </div>
           </q-card-section>
         </q-card>
@@ -43,9 +43,9 @@
           </div>
         </div>
 
-        <q-card class="q-mt-sm">
-          <q-card-section @click="router.push('/nav/1')">
-            <div class="text-h6">SAKERNAS 2024 AGS - PENDATAAN</div>
+        <q-card class="q-mt-sm" v-for="k in kegiatans?.data" :key="k.id">
+          <q-card-section @click="router.push(`/nav/${k.id}`)">
+            <div class="text-h6">{{k.nama+" "+k.tahun}}</div>
             <div class="text-subtitle2">Survey Sample</div>
           </q-card-section>
           <q-card-actions>
@@ -150,9 +150,12 @@ import { useRouter } from 'vue-router'
 import { useExitHandler } from 'src/composables/useExitHandler'
 
 import { useOnlineStatus } from 'src/composables/useOnlineStatus';
+import {useKegiatanService} from 'src/composables/useKegiatanService';
 const { isOnline } = useOnlineStatus();
 
+const {getKegiatans,getRekapitulasiKegiatan} = useKegiatanService();
 const {user,token,initToken,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,getTokenExpirationDate,isTokenExpired,getShowSuccessLogin,setShowSuccessLogin} = useAuth();
+
 const activeUser = ref({});
 const router = useRouter();
 const formattedTokenExpiredDate = ref('');
@@ -160,6 +163,8 @@ const $q = useQuasar();
 const panel = ref('beranda');
 const canGoBack = ref(false)
 const { handleExit } = useExitHandler()
+const rekapitulasi_kegiatan = ref({});
+const kegiatans = ref({});
 
 const handleBackButton = (event) => {
   if (canGoBack.value) {
@@ -175,6 +180,10 @@ onBeforeMount(async ()=>{
 onMounted(async ()=>{
   initToken();
   try{
+    rekapitulasi_kegiatan.value = await getRekapitulasiKegiatan();
+    kegiatans.value = await getKegiatans();
+    console.log("rekapitulasi",rekapitulasi_kegiatan.value)
+    console.log("kegiatan",kegiatans.value)
     if(!getShowSuccessLogin()){
       formattedTokenExpiredDate.value =  await getFormattedTokenExpirationDate()
       activeUser.value = await user();

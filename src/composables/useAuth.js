@@ -4,9 +4,11 @@ import localForage from 'src/boot/local-forage'
 import { api } from 'src/boot/axios'
 import { useQuasar } from 'quasar'
 import {decodeCredential} from "vue3-google-signin";
+import { useKegiatanService } from './useKegiatanService';
 
 
 export default function useAuth() {
+  const {handleLogoutKegiatanService,getIsLoggedIn,setIsLoggedIn} = useKegiatanService();
   const token = ref(null)
   const token_expires_at = ref(null);
   const show_success_login = ref(null);
@@ -137,6 +139,7 @@ export default function useAuth() {
     try {
     const decodedCredential = decodeCredential(credential);
     setUser(decodedCredential);
+    setIsLoggedIn(true);
     console.log("Credential: ", credential);
 
     const response = await api.post('/login', { email: decodedCredential.email, credentials: credential })
@@ -157,6 +160,9 @@ export default function useAuth() {
     await localForage.setItem('user', null);
     await localForage.setItem('token', null);
     await localForage.setItem('token_expires_at', null);
+// const {handleLogoutKegiatanService} = useKegiatanService();
+    await handleLogoutKegiatanService();
+    setIsLoggedIn(false);
     setShowSuccessLogin(false);
   }
   const setUser = async (user) => {
