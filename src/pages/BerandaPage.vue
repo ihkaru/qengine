@@ -39,14 +39,14 @@
             <div class="text-h6">Daftar Survei</div>
           </div>
           <div class="col-4 text-right">
-            <q-btn icon="sync" color="primary" label="SYNC" rounded />
+            <q-btn icon="sync" color="primary" label="SYNC" rounded @click="handleSyncKegiatan"/>
           </div>
         </div>
 
         <q-card class="q-mt-sm" v-for="k in kegiatans?.data" :key="k.id">
           <q-card-section @click="router.push(`/nav/${k.id}`)">
             <div class="text-h6">{{k.nama+" "+k.tahun}}</div>
-            <div class="text-subtitle2">Survey Sample</div>
+            <div class="text-subtitle2">{{constants.LEVEL_PENDATAAN[k.level_pendataan]}}</div>
           </q-card-section>
           <q-card-actions>
             <q-btn flat color="primary" icon="chevron_right" />
@@ -151,11 +151,14 @@ import { useExitHandler } from 'src/composables/useExitHandler'
 
 import { useOnlineStatus } from 'src/composables/useOnlineStatus';
 import {useKegiatanService} from 'src/composables/useKegiatanService';
+import { useConstants } from 'src/composables/useConstants';
+
 const { isOnline } = useOnlineStatus();
 
-const {getKegiatans,getRekapitulasiKegiatan} = useKegiatanService();
+const {getKegiatans,getRekapitulasiKegiatan,initKegiatanService} = useKegiatanService();
 const {user,token,initToken,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,getTokenExpirationDate,isTokenExpired,getShowSuccessLogin,setShowSuccessLogin} = useAuth();
 
+const constants = useConstants();
 const activeUser = ref({});
 const router = useRouter();
 const formattedTokenExpiredDate = ref('');
@@ -165,6 +168,8 @@ const canGoBack = ref(false)
 const { handleExit } = useExitHandler()
 const rekapitulasi_kegiatan = ref({});
 const kegiatans = ref({});
+const instance = getCurrentInstance();
+
 
 const handleBackButton = (event) => {
   if (canGoBack.value) {
@@ -247,7 +252,21 @@ const confirmLogout = () => {
         // console.log('I am triggered on both OK and Cancel')
       })
     }
+const handleSyncKegiatan = async ()=>{
+  let dismiss = $q.notify({
+      progress: true,
+      spinner: true,
+      message: 'Sync..',
+      color: "primary",
+      textColor: "white",
+      timeout: 5000
+      })
+  await initKegiatanService(true);
+  rekapitulasi_kegiatan.value = await getRekapitulasiKegiatan();
+  kegiatans.value = await getKegiatans();
+  setTimeout(dismiss,2000);
 
+}
 </script>
 
 <style scoped>

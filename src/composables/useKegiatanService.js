@@ -44,10 +44,10 @@ export function useKegiatanService() {
 
 
 
-  const initKegiatanService = async ()=>{
+  const initKegiatanService = async (force = false)=>{
     console.log("init kegiatan data");
     console.log("init kegiatan data after",await getKegiatans(), await getIsLoggedIn());
-    if(!Boolean(await getKegiatans()) && await getIsLoggedIn() ){
+    if((!Boolean(await getKegiatans()) && await getIsLoggedIn()) || force){
       console.log("calling API");
       api.get("/kegiatans?per_page=30").then(async (response)=>{
         await setRekapitulasiKegiatan(response.data.rekapitulasi);
@@ -67,6 +67,6 @@ export function useKegiatanService() {
   return {
     getKegiatans,getRekapitulasiKegiatan,handleLogoutKegiatanService
     ,setIsLoggedIn,
-    getIsLoggedIn
+    getIsLoggedIn,initKegiatanService
   }
 }
