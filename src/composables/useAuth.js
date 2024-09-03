@@ -2,13 +2,16 @@
 import { ref, watch } from 'vue'
 import localForage from 'src/boot/local-forage'
 import { api } from 'src/boot/axios'
-import { useRouter } from 'vue-router'
-import {jwtDecode} from 'jwt-decode';
+import { useQuasar } from 'quasar'
+import {decodeCredential} from "vue3-google-signin";
+
 
 export default function useAuth() {
   const token = ref(null)
   const token_expires_at = ref(null);
   const show_success_login = ref(null);
+  const $q = useQuasar();
+
   const setAuthHeader = (value) => {
     if (value) {
       api.defaults.headers.common['Authorization'] = `Bearer ${value}`
@@ -23,62 +26,75 @@ export default function useAuth() {
     return show_success_login.value ;
   }
 
-  const isTokenExpired = ()=>{
-    if (!Boolean(token.value)) {
-      console.log('1token is expired',token.value);
-      return true;
-    }
-    if (!Boolean(token_expires_at.value)) {
-      console.log('2token is expired',token.value);
-      return true;
-    }
+  const isTokenExpired = async ()=>{
     try {
-      console.log("is expired",token_expires_at.value < currentTime)
-      return token_expires_at.value < currentTime;
-    } catch (error) {
-      return true;
+    token.value = await getToken();
+      if (!Boolean(token.value)) {
+        console.log('1token is expired',token.value);
+        return true;
+      }
+      if (!Boolean(token_expires_at.value)) {
+        console.log('2token is expired',token.value);
+        return true;
+      }
+
+        console.log("is expired",token_expires_at.value < currentTime)
+        return token_expires_at.value < currentTime;
+      } catch (error) {
+        return true;
     }
   }
   const initToken = async () => {
     const storedToken = await localForage.getItem('token')
     const storedTokenExpiresAt = await localForage.getItem('token_expires_at')
-    if (storedToken) {
+    if (Boolean(storedToken)) {
       token.value = storedToken
       setAuthHeader(storedToken)
     }
-    if(storedTokenExpiresAt){
+    if(Boolean(storedTokenExpiresAt)){
       token_expires_at.value = storedTokenExpiresAt
     }
   }
 
-  const getTokenExpirationDate = (token) => {
+  const getTokenExpirationDate = async () => {
     try {
-      if (token_expires_at.value === undefined) {
-        return null;
-      }
 
-      const date = new Date(0); // The 0 sets the date to the epoch
-      date.setUTCSeconds(token_expires_at.value);
+      if (!Boolean(token_expires_at.value)) {
+        token_expires_at.value = await localForage.getItem("token_expires_at");
+      }
+      const date = new Date(token_expires_at.value);
       return date;
     } catch (error) {
+      $q.notify({
+        message: "Gagal: "+error.message
+      })
       return null;
     }
   }
 
   const formatDate = (date) => {
-    if (!date) return 'N/A';
+    if (!Boolean(date)) return 'N/A';
 
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString().slice(-2);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZoneName: 'short' // Includes the timezone abbreviation
+    };
 
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    // Format the date using the Indonesian locale and the user's local timezone
+    const formattedDate = new Intl.DateTimeFormat('id-ID', options).format(date);
+
+    console.log(formattedDate);
+
+    return  formattedDate ;
   }
 
   const getFormattedTokenExpirationDate = async () => {
-    return formatDate(getTokenExpirationDate(await localForage.getItem('token')))
+    return formatDate(await getTokenExpirationDate());
   }
 
   watch(token, (newToken) => {
@@ -91,18 +107,24 @@ export default function useAuth() {
     }
   })
   watch(token_expires_at, (newTokenExpiresAt) => {
-    if (newTokenExpiresAt) {
+    if (Boolean(newTokenExpiresAt)) {
       localForage.setItem('token_expires_at', newTokenExpiresAt)
+      console.log("expires at has been set",newTokenExpiresAt)
       setAuthHeader(newTokenExpiresAt)
     } else {
       localForage.removeItem('token_expires_at')
     }
   })
   const getToken = async ()=>{
-    return await localForage.getItem('token');
+    if(!Boolean(token.value)){
+      token.value = await localForage.getItem('token');
+    }
+    return token.value;
   }
+
   const redirectIfTokenExpired = async ()=>{
-    let storedToken = await localForage.getItem('token');
+    let storedToken = await getToken();
+
     console.log('this is token',storedToken);
     if(!storedToken){
       return '/login';
@@ -111,9 +133,13 @@ export default function useAuth() {
     return '/home/beranda';
   }
 
-  const login = async (email, credential) => {
+  const login = async (credential) => {
     try {
-    const response = await api.post('/login', { email: email, credentials: credential })
+    const decodedCredential = decodeCredential(credential);
+    setUser(decodedCredential);
+    console.log("Credential: ", credential);
+
+    const response = await api.post('/login', { email: decodedCredential.email, credentials: credential })
     token.value = response.data.access_token
     token_expires_at.value = response.data.expires_at;
     console.log("this is token expired date",token_expires_at.value )
@@ -147,7 +173,7 @@ export default function useAuth() {
     token,
     login,logout,
     getToken,
-    redirectIfTokenExpired, getFormattedTokenExpirationDate,isTokenExpired,
+    redirectIfTokenExpired, getFormattedTokenExpirationDate,isTokenExpired,getTokenExpirationDate,
     user,setUser,
     initToken,
     setShowSuccessLogin,getShowSuccessLogin

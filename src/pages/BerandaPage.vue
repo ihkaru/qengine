@@ -2,9 +2,19 @@
   <q-page class="q-pa-md">
     <q-tab-panels v-model="panel" animated swipeable class="full-height" style="min-height: 100%;">
       <q-tab-panel name="beranda">
-        <div class="text-h6">Halo, {{activeUser?.name}}!</div>
-        <div class="text-subtitle2">Selamat datang di CERDAS</div>
+        <div class="flex justify-between">
+          <div class="space-between">
+            <div class="text-h6">Halo, {{activeUser?.name}}!</div>
+            <div class="text-subtitle2">Selamat datang di CERDAS</div>
+          </div>
+          <q-btn
+            :icon="isOnline ? 'signal_wifi_4_bar' : 'signal_wifi_off'"
+            :class="{ 'text-positive': isOnline, 'text-negative': !isOnline, 'pulse-animation': !isOnline }"
+            rounded
+            flat
+          />
 
+        </div>
         <q-card flat bordered class="q-mt-md">
           <q-card-section class="row items-center q-pb-none">
             <div class="col-4 text-center">
@@ -29,7 +39,7 @@
             <div class="text-h6">Daftar Survei</div>
           </div>
           <div class="col-4 text-right">
-            <q-btn color="primary" label="SYNC SURVEI" />
+            <q-btn icon="sync" color="primary" label="SYNC" rounded />
           </div>
         </div>
 
@@ -41,9 +51,6 @@
           <q-card-actions>
             <q-btn flat color="primary" icon="chevron_right" />
           </q-card-actions>
-        </q-card>
-        <q-card>
-          <p>Token Exist: {{ ""+Boolean(token) }}</p>
         </q-card>
       </q-tab-panel>
       <q-tab-panel name="upload">
@@ -58,14 +65,15 @@
         <q-card class="q-mb-md">
           <q-item>
             <q-item-section avatar>
-              <q-avatar color="primary" text-color="white">
-                J
+              <q-avatar>
+                <img :src="activeUser.picture">
               </q-avatar>
             </q-item-section>
             <q-item-section>
               <q-item-label>{{activeUser.name}}</q-item-label>
               <q-item-label caption>{{activeUser.email}}</q-item-label>
-              <q-item-label caption>session expired: {{formattedTokenExpiredDate}}</q-item-label>
+              <q-item-label caption>session expired:</q-item-label>
+              <q-item-label caption>{{formattedTokenExpiredDate}}</q-item-label>
             </q-item-section>
           </q-item>
         </q-card>
@@ -117,7 +125,7 @@
           color="primary"
           outline
           label="LOGOUT"
-          @click="handleLogout"
+          @click="confirmLogout"
         />
       </q-tab-panel>
     </q-tab-panels>
@@ -141,7 +149,10 @@ import { onMounted, ref,onBeforeMount } from 'vue';
 import { useRouter } from 'vue-router'
 import { useExitHandler } from 'src/composables/useExitHandler'
 
-const {user,token,initToken,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,isTokenExpired,getShowSuccessLogin,setShowSuccessLogin} = useAuth();
+import { useOnlineStatus } from 'src/composables/useOnlineStatus';
+const { isOnline } = useOnlineStatus();
+
+const {user,token,initToken,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,getTokenExpirationDate,isTokenExpired,getShowSuccessLogin,setShowSuccessLogin} = useAuth();
 const activeUser = ref({});
 const router = useRouter();
 const formattedTokenExpiredDate = ref('');
@@ -159,12 +170,19 @@ const handleBackButton = (event) => {
 }
 
 onBeforeMount(async ()=>{
-  initToken();
+  // initToken();
 })
 onMounted(async ()=>{
-  // initToken();
+  initToken();
   try{
     if(!getShowSuccessLogin()){
+      formattedTokenExpiredDate.value =  await getFormattedTokenExpirationDate()
+      activeUser.value = await user();
+      if(!Boolean(activeUser.value)){
+        throw new Error("User tidak ditemukan")
+      }
+      // forma
+      console.log("this is",formattedTokenExpiredDate.value)
       $q.notify({
                 progress: true,
                 message: 'Berhasil login',
@@ -174,8 +192,9 @@ onMounted(async ()=>{
                 timeout: 2000
               })
     }
+
     setShowSuccessLogin(false);
-    activeUser.value = await user();
+    formattedTokenExpiredDate.value =  await getFormattedTokenExpirationDate()
   } catch (error) {
       $q.notify({
         type: 'negative',
@@ -183,7 +202,7 @@ onMounted(async ()=>{
         progress: true,
         timeout: 2000
       })
-      // router.push("/login")
+      router.push("/login")
   }
   // formattedTokenExpiredDate.value = await getFormattedTokenExpirationDate();
   // console.log(isTokenExpired());
@@ -196,8 +215,49 @@ const handleLogout = async ()=>{
   router.push(await redirectIfTokenExpired());
 }
 
+const confirmLogout = () => {
+      $q.dialog({
+        title: 'Confirm',
+        message: 'Apakah Anda ingin logout?',
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        $q.dialog({
+          title: 'Confirm',
+          message: 'Apakah Anda yakin?',
+          cancel: true,
+          persistent: true
+        }).onOk(() => {
+          handleLogout();
+      })
+      }).onOk(() => {
+        // console.log('>>>> second OK catcher')
+      }).onCancel(() => {
+        // console.log('>>>> Cancel')
+      }).onDismiss(() => {
+        // console.log('I am triggered on both OK and Cancel')
+      })
+    }
+
 </script>
 
 <style scoped>
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.6s;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
+.pulse-animation {
+  animation: pulse 5s infinite;
+}
 </style>

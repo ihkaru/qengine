@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import { ref,onMounted } from 'vue'
 import useAuth from 'src/composables/useAuth'
-import {GoogleSignInButton,decodeCredential} from "vue3-google-signin";
+import {GoogleSignInButton} from "vue3-google-signin";
 import { useRouter } from 'vue-router'
 import { QSpinnerGears, QSpinnerPie, useQuasar } from 'quasar';
 const $q = useQuasar()
@@ -111,11 +111,8 @@ const handleLoginSuccess = async (response) => {
       timeout: 10000
     })
     const { credential } = response;
-    const decodedCredential = decodeCredential(credential);
-    console.log("User:", decodedCredential);
-    console.log("Credential: ", credential);
-    await login(decodedCredential.email,credential);
-    setUser(decodedCredential);
+
+    await login(credential);
     // console.log('idb profile', await idb.getProfile(decodedCredential.id))
     console.log("Token",token.value)
     console.log( response);
