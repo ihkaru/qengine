@@ -141,7 +141,6 @@
     </q-footer>
   </q-page>
 </template>
-
 <script setup>
 import { QSpinnerGears, useQuasar } from 'quasar';
 import useAuth from 'src/composables/useAuth';
