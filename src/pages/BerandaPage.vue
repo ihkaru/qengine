@@ -167,7 +167,7 @@ const canGoBack = ref(false)
 const { handleExit } = useExitHandler()
 const rekapitulasi_kegiatan = ref({});
 const kegiatans = ref({});
-const instance = getCurrentInstance();
+
 
 
 const handleBackButton = (event) => {

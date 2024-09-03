@@ -1,1 +1,0 @@
-import{Q as e}from"./QPage.c2b83899.js";import{_ as a}from"./plugin-vue_export-helper.21dcd24c.js";import{e as r,j as t,w as o,q as s}from"./index.1f0c2728.js";const c={},f=s("h1",null,"Daftar Rekap Level 1 Page",-1);function _(l,n){return r(),t(e,{class:"flex flex-center"},{default:o(()=>[f]),_:1})}var d=a(c,[["render",_]]);export{d as default};
