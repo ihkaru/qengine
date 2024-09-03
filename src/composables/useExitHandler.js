@@ -1,5 +1,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useQuasar } from 'quasar'
+import { useQuasar } from 'quasar';
+import { Dialog } from 'quasar';
+
 
 export function useExitHandler() {
   const $q = useQuasar()
@@ -9,7 +11,7 @@ export function useExitHandler() {
     exitAttempts.value++
 
     if (exitAttempts.value === 1) {
-      $q.dialog({
+      Dialog.create({
         title: 'Exit App',
         message: 'Are you sure you want to exit the app?',
         cancel: true,

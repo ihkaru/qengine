@@ -7,6 +7,8 @@ import {jwtDecode} from 'jwt-decode';
 
 export default function useAuth() {
   const token = ref(null)
+  const token_expires_at = ref(null);
+  const show_success_login = ref(null);
   const setAuthHeader = (value) => {
     if (value) {
       api.defaults.headers.common['Authorization'] = `Bearer ${value}`
@@ -14,36 +16,49 @@ export default function useAuth() {
       delete api.defaults.headers.common['Authorization']
     }
   }
+  const setShowSuccessLogin= (newSuccessLogin)=>{
+    show_success_login.value = newSuccessLogin;
+  }
+  const getShowSuccessLogin= ()=>{
+    return show_success_login.value ;
+  }
 
-  const isTokenExpired = (token)=>{
-    if (!token) {
+  const isTokenExpired = ()=>{
+    if (!Boolean(token.value)) {
+      console.log('1token is expired',token.value);
+      return true;
+    }
+    if (!Boolean(token_expires_at.value)) {
+      console.log('2token is expired',token.value);
       return true;
     }
     try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      return decoded.exp < currentTime;
+      console.log("is expired",token_expires_at.value < currentTime)
+      return token_expires_at.value < currentTime;
     } catch (error) {
       return true;
     }
   }
   const initToken = async () => {
     const storedToken = await localForage.getItem('token')
+    const storedTokenExpiresAt = await localForage.getItem('token_expires_at')
     if (storedToken) {
       token.value = storedToken
       setAuthHeader(storedToken)
+    }
+    if(storedTokenExpiresAt){
+      token_expires_at.value = storedTokenExpiresAt
     }
   }
 
   const getTokenExpirationDate = (token) => {
     try {
-      const decoded = jwtDecode(token);
-      if (decoded.exp === undefined) {
+      if (token_expires_at.value === undefined) {
         return null;
       }
 
       const date = new Date(0); // The 0 sets the date to the epoch
-      date.setUTCSeconds(decoded.exp);
+      date.setUTCSeconds(token_expires_at.value);
       return date;
     } catch (error) {
       return null;
@@ -75,6 +90,14 @@ export default function useAuth() {
       setAuthHeader(null)
     }
   })
+  watch(token_expires_at, (newTokenExpiresAt) => {
+    if (newTokenExpiresAt) {
+      localForage.setItem('token_expires_at', newTokenExpiresAt)
+      setAuthHeader(newTokenExpiresAt)
+    } else {
+      localForage.removeItem('token_expires_at')
+    }
+  })
   const getToken = async ()=>{
     return await localForage.getItem('token');
   }
@@ -84,23 +107,31 @@ export default function useAuth() {
     if(!storedToken){
       return '/login';
     }
-    if(isTokenExpired(storedToken)) return '/login';
+    if(isTokenExpired()) return '/login';
     return '/home/beranda';
   }
 
   const login = async (email, credential) => {
     try {
     const response = await api.post('/login', { email: email, credentials: credential })
-      token.value = response.data.access_token
+    token.value = response.data.access_token
+    token_expires_at.value = response.data.expires_at;
+    console.log("this is token expired date",token_expires_at.value )
+
     } catch (error) {
       console.error('Login failed:', error)
       throw error
     }
+    setShowSuccessLogin(true);
   }
 
   const logout = async () => {
     token.value = null;
+    token_expires_at.value = null;
     await localForage.setItem('user', null);
+    await localForage.setItem('token', null);
+    await localForage.setItem('token_expires_at', null);
+    setShowSuccessLogin(false);
   }
   const setUser = async (user) => {
     await localForage.setItem('user', user);
@@ -117,6 +148,8 @@ export default function useAuth() {
     login,logout,
     getToken,
     redirectIfTokenExpired, getFormattedTokenExpirationDate,isTokenExpired,
-    user,setUser
+    user,setUser,
+    initToken,
+    setShowSuccessLogin,getShowSuccessLogin
   }
 }

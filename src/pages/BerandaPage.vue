@@ -2,8 +2,8 @@
   <q-page class="q-pa-md">
     <q-tab-panels v-model="panel" animated swipeable class="full-height" style="min-height: 100%;">
       <q-tab-panel name="beranda">
-        <div class="text-h6">Halo, {{activeUser.name}}!</div>
-        <div class="text-subtitle2">Selamat datang di FASIH</div>
+        <div class="text-h6">Halo, {{activeUser?.name}}!</div>
+        <div class="text-subtitle2">Selamat datang di CERDAS</div>
 
         <q-card flat bordered class="q-mt-md">
           <q-card-section class="row items-center q-pb-none">
@@ -41,6 +41,9 @@
           <q-card-actions>
             <q-btn flat color="primary" icon="chevron_right" />
           </q-card-actions>
+        </q-card>
+        <q-card>
+          <p>Token Exist: {{ ""+Boolean(token) }}</p>
         </q-card>
       </q-tab-panel>
       <q-tab-panel name="upload">
@@ -134,11 +137,11 @@
 <script setup>
 import { QSpinnerGears, useQuasar } from 'quasar';
 import useAuth from 'src/composables/useAuth';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref,onBeforeMount } from 'vue';
 import { useRouter } from 'vue-router'
 import { useExitHandler } from 'src/composables/useExitHandler'
 
-const {user,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,isTokenExpired} = useAuth();
+const {user,token,initToken,logout,redirectIfTokenExpired,getFormattedTokenExpirationDate,isTokenExpired,getShowSuccessLogin,setShowSuccessLogin} = useAuth();
 const activeUser = ref({});
 const router = useRouter();
 const formattedTokenExpiredDate = ref('');
@@ -155,18 +158,35 @@ const handleBackButton = (event) => {
   }
 }
 
-
+onBeforeMount(async ()=>{
+  initToken();
+})
 onMounted(async ()=>{
-  $q.loading.show({
-          spinner: QSpinnerGears,
-          spinnerColor: 'teal-5',
-          message: 'Memeriksa..',
-          messageColor: 'black',
-          backgroundColor: 'white'
-        });
-  activeUser.value = await user();
-  formattedTokenExpiredDate.value = await getFormattedTokenExpirationDate();
-  console.log(isTokenExpired());
+  // initToken();
+  try{
+    if(!getShowSuccessLogin()){
+      $q.notify({
+                progress: true,
+                message: 'Berhasil login',
+                icon: 'check',
+                color: 'green',
+                textColor: 'white',
+                timeout: 2000
+              })
+    }
+    setShowSuccessLogin(false);
+    activeUser.value = await user();
+  } catch (error) {
+      $q.notify({
+        type: 'negative',
+        message: 'Login gagal: '+error.message,
+        progress: true,
+        timeout: 2000
+      })
+      // router.push("/login")
+  }
+  // formattedTokenExpiredDate.value = await getFormattedTokenExpirationDate();
+  // console.log(isTokenExpired());
   // if(isTokenExpired()) router.push('/login');
   $q.loading.hide();
   console.log('this is user active',activeUser.value);
