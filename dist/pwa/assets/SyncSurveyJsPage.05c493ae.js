@@ -1,0 +1,1 @@
+import{Q as e}from"./QPage.c2b83899.js";import{_ as r}from"./plugin-vue_export-helper.21dcd24c.js";import{e as a,j as t,w as c,q as s}from"./index.1f0c2728.js";const o={},n=s("h1",null,"Sync Survey JS Page",-1);function _(f,l){return a(),t(e,{class:"flex flex-center"},{default:c(()=>[n]),_:1})}var d=r(o,[["render",_]]);export{d as default};
