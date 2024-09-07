@@ -11,8 +11,9 @@ export default function useAuth() {
   const {handleLogoutKegiatanService,getIsLoggedIn,setIsLoggedIn} = useKegiatanService();
   const token = ref(null)
   const token_expires_at = ref(null);
-  const show_success_login = ref(null);
+  const show_success_login = ref(true);
   const $q = useQuasar();
+
 
   const setAuthHeader = (value) => {
     if (value) {
@@ -32,23 +33,19 @@ export default function useAuth() {
     try {
     token.value = await getToken();
       if (!Boolean(token.value)) {
-        console.log('1token is expired',token.value);
         return true;
       }
       if (!Boolean(token_expires_at.value)) {
-        console.log('2token is expired',token.value);
         return true;
       }
-
-        console.log("is expired",token_expires_at.value < currentTime)
         return token_expires_at.value < currentTime;
       } catch (error) {
         return true;
     }
   }
   const initToken = async () => {
-    const storedToken = await localForage.getItem('token')
-    const storedTokenExpiresAt = await localForage.getItem('token_expires_at')
+    let storedToken = await localForage.getItem('token')
+    let storedTokenExpiresAt = await localForage.getItem('token_expires_at')
     if (Boolean(storedToken)) {
       token.value = storedToken
       setAuthHeader(storedToken)
@@ -90,7 +87,6 @@ export default function useAuth() {
     // Format the date using the Indonesian locale and the user's local timezone
     const formattedDate = new Intl.DateTimeFormat('id-ID', options).format(date);
 
-    console.log(formattedDate);
 
     return  formattedDate ;
   }
@@ -111,7 +107,6 @@ export default function useAuth() {
   watch(token_expires_at, (newTokenExpiresAt) => {
     if (Boolean(newTokenExpiresAt)) {
       localForage.setItem('token_expires_at', newTokenExpiresAt)
-      console.log("expires at has been set",newTokenExpiresAt)
       setAuthHeader(newTokenExpiresAt)
     } else {
       localForage.removeItem('token_expires_at')
@@ -126,8 +121,6 @@ export default function useAuth() {
 
   const redirectIfTokenExpired = async ()=>{
     let storedToken = await getToken();
-
-    console.log('this is token',storedToken);
     if(!storedToken){
       return '/login';
     }
@@ -140,15 +133,12 @@ export default function useAuth() {
     const decodedCredential = decodeCredential(credential);
     setUser(decodedCredential);
     setIsLoggedIn(true);
-    console.log("Credential: ", credential);
 
     const response = await api.post('/login', { email: decodedCredential.email, credentials: credential })
     token.value = response.data.access_token
     token_expires_at.value = response.data.expires_at;
-    console.log("this is token expired date",token_expires_at.value )
 
     } catch (error) {
-      console.error('Login failed:', error)
       throw error
     }
     setShowSuccessLogin(true);

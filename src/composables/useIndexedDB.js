@@ -7,7 +7,7 @@ export const useIndexedDB = () => {
     },
   });
 
-  const saveProfile = async (profile) => {
+const saveProfile = async (profile) => {
     const db = await dbPromise;
     await db.put('profiles', profile);
   };
