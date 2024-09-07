@@ -18,7 +18,6 @@
           <q-card-section>
             <div class="text-h6">{{ selectedKegiatan?.subkategori }}</div>
           </q-card-section>
-
           <q-card-section class="q-pt-none">
             <div class="row justify-around">
               <div v-for="(value, key) in statusCounts" :key="key" class="ext-center">
