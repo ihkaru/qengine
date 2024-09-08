@@ -14,6 +14,15 @@
     </q-header>
     <q-page-container>
       <router-view />
+      <q-drawer v-model="view.qustionerLeftDrawerOpen" show-if-above bordered>
+        <q-list>
+          <q-item-label header>
+            Essential Links
+          </q-item-label>
+
+          <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
+        </q-list>
+      </q-drawer>
     </q-page-container>
   </q-layout>
 </template>

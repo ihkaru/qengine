@@ -35,11 +35,12 @@
 import 'survey-core/defaultV2.min.css';
 import { Model } from 'survey-core';
 import { useQuasar } from 'quasar'
-import { onBeforeMount, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onBeforeMount, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
 const $q = useQuasar()
 const router = useRouter()
+const route = useRoute()
 const approval = ref(false);
 const toggleApproval = function () {
   approval.value = !approval.value;
@@ -52,6 +53,30 @@ onBeforeMount(async () => {
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
   console.log(selectedKegiatan.value)
 })
+onMounted(async () => {
+  if (route.query.mode == 'tambahAssignment') {
+    // Trigger the notification
+    $q.notify({
+      progress: true,
+      message: 'Mode tambah assignment',
+      icon: 'info',
+      color: 'blue',
+      textColor: 'white',
+      timeout: 2000
+    })
+  }
+  if (route.query.mode == 'editAssignment') {
+    // Trigger the notification
+    $q.notify({
+      progress: true,
+      message: 'Mode edit assignment',
+      icon: 'info',
+      color: 'blue',
+      textColor: 'white',
+      timeout: 2000
+    })
+  }
+})
 
 const alertResults = (sender) => {
   const results = JSON.stringify(sender.data);
@@ -62,7 +87,12 @@ const alertResults = (sender) => {
   // )
 }
 const simpanDanKeluar = () => {
-  router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/haha`)
+  router.push({
+    path: `/nav/kegiatans/${selectedKegiatan.value.id}/haha`,
+    query: {
+      isSaveSuccess: true
+    }
+  })
 }
 
 

@@ -52,7 +52,8 @@
         <q-fab-action external-label color="warning" icon="filter_alt" label="Filter by Status" label-position="left" />
         <q-fab-action external-label color="warning" icon="done" label="Tandai wilayah telah selesai"
           label-position="left" />
-        <q-fab-action external-label color="grey" icon="add" label="Tambah Assignment" label-position="left" />
+        <q-fab-action external-label color="grey" icon="add" label="Tambah Assignment" label-position="left"
+          @click="onTambahAssignment" />
       </q-fab>
     </q-page-sticky>
     <q-dialog v-model="openAksiDialog" :position="aksiDialogPosition">
@@ -81,10 +82,13 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
-import { onBeforeMount, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onBeforeMount, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 const router = useRouter()
+const route = useRoute()
+const $q = useQuasar()
 
 const filter = ref('')
 const entriesPerPage = ref(50);
@@ -121,6 +125,19 @@ onBeforeMount(async () => {
   console.log(selectedKegiatan.value)
 })
 
+onMounted(async () => {
+  if (route.query.isSaveSuccess == 'true') {
+    console.log('save success')
+    $q.notify({
+      progress: true,
+      message: 'Isian berhasil disimpan',
+      icon: 'check',
+      color: 'green',
+      textColor: 'white',
+      timeout: 2000
+    })
+  }
+})
 
 const openAksi = (pos, row) => {
   selectedRow.value = row
@@ -131,7 +148,22 @@ const onAksiDialog = (aksi) => {
   if (aksi == "buka") onBukaForm();
 }
 const onBukaForm = () => {
-  router.push(`/form/kegiatans/${selectedKegiatan.value.id}/respondens/haha`)
+  router.push(
+    {
+      path: `/form/kegiatans/${selectedKegiatan.value.id}/respondens/haha`,
+      query: {
+        mode: `editAssignment`
+      }
+    }
+  )
+}
+const onTambahAssignment = () => {
+  router.push({
+    path: `/form/kegiatans/${selectedKegiatan.value.id}/respondens/haha`,
+    query: {
+      mode: `tambahAssignment`
+    }
+  })
 }
 </script>
 

@@ -11,8 +11,10 @@
 </template>
 
 <script setup>
+import { useBackHandler } from 'src/composables/useBackHandler';
 import { ref, computed, Transition } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+const Back = useBackHandler();
 
 const router = useRouter();
 const route = useRoute();

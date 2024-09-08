@@ -124,6 +124,7 @@ const routes = [
             path: "beranda",
             component: () => import("pages/BerandaPage.vue"),
             meta: {
+              title: "Beranda",
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",

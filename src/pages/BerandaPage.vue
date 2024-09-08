@@ -137,11 +137,11 @@ import { QSpinnerGears, useQuasar } from 'quasar';
 import useAuth from 'src/composables/useAuth';
 import { onMounted, ref, onBeforeMount, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
-import { useExitHandler } from 'src/composables/useExitHandler'
 
 import { useOnlineStatus } from 'src/composables/useOnlineStatus';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
 import { useConstants } from 'src/composables/useConstants';
+import { useBackHandler } from 'src/composables/useBackHandler';
 
 const { isOnline } = useOnlineStatus();
 
@@ -156,7 +156,7 @@ const formattedTokenExpiredDate = ref('');
 const $q = useQuasar();
 const panel = ref('beranda-page');
 const canGoBack = ref(false)
-const { handleExit } = useExitHandler()
+const Back = useBackHandler()
 const rekapitulasi_kegiatan = ref({});
 const kegiatans = ref({});
 const showSuccessLogin = ref(false);
@@ -170,7 +170,7 @@ const handleBackButton = (event) => {
   if (canGoBack.value) {
     router.back()
   } else {
-    handleExit()
+    Back.handleExit()
   }
 }
 

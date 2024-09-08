@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf" :class="{ 'body--dark': $q.dark.isActive }">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-btn dense flat round icon="arrow_back" @click="goBack" />
+        <q-btn dense flat round icon="arrow_back" @click="Back.goBack" />
         <q-toolbar-title>{{ pageTitle }}</q-toolbar-title>
         <q-btn dense flat round icon="info" />
         <q-btn dense flat round icon="more_vert" />
@@ -21,6 +21,7 @@
 </template>
 
 <script setup>
+import { useBackHandler } from 'src/composables/useBackHandler';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
 import { ref, computed, Transition, watch, onBeforeMount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -29,6 +30,7 @@ const router = useRouter();
 const route = useRoute();
 const selectedKegiatan = ref(null);
 const Kegiatan = useKegiatanService();
+const Back = useBackHandler();
 
 // Page title state
 const pageTitle = ref(route.meta.title || 'Default Title');
@@ -59,11 +61,11 @@ const leaveClass = computed(() => {
 
 
 
-const goBack = () => {
-  if (route.meta.title == "Periode") router.push("/home/beranda");
-  else if (route.meta.title == "Daftar Wilayah") router.push(`/nav/kegiatans/${selectedKegiatan.value.id}`);
-  else if (route.meta.title == "Daftar Assignment") router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/list-level-1`);
-  else
-    router.back();
-};
+// const goBack = () => {
+//   if (route.meta.title == "Periode") router.push("/home/beranda");
+//   else if (route.meta.title == "Daftar Wilayah") router.push(`/nav/kegiatans/${selectedKegiatan.value.id}`);
+//   else if (route.meta.title == "Daftar Assignment") router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/list-level-1`);
+//   else
+//     router.back();
+// };
 </script>
