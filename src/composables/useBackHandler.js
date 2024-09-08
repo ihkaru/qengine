@@ -1,13 +1,16 @@
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, onBeforeMount } from "vue";
 import { useQuasar } from "quasar";
 import { Dialog } from "quasar";
 import { useRoute, useRouter } from "vue-router";
+import { useKegiatanService } from "./useKegiatanService";
 
 export function useBackHandler() {
   const $q = useQuasar();
   const route = useRoute();
   const router = useRouter();
   const exitAttempts = ref(0);
+  const selectedKegiatan = ref(null);
+  const Kegiatan = useKegiatanService();
 
   const handleExit = () => {
     exitAttempts.value++;
@@ -54,12 +57,17 @@ export function useBackHandler() {
     else router.back();
   };
   onMounted(() => {
-    // history.pushState(null, "", window.location.pathname);
+    history.pushState(null, "", window.location.pathname);
     window.addEventListener("popstate", handlePopState);
   });
 
   onUnmounted(() => {
+    exitAttempts.value = 0;
     window.removeEventListener("popstate", handlePopState);
+  });
+  onBeforeMount(async () => {
+    selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
+    console.log(selectedKegiatan.value);
   });
 
   return {
