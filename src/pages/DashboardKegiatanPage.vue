@@ -1,8 +1,8 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="text-center text-weight-bold text-blue-7">
+    <h5 class="text-center text-weight-bold text-blue-7">
       {{ selectedKegiatan?.nama }} {{ selectedKegiatan?.tahun }}
-    </div>
+    </h5>
     <br>
     <div class="col-4 text-right">
       <q-btn icon="sync" color="primary" label="Sync Periode" rounded />
@@ -14,7 +14,7 @@
       </q-card-section>
 
       <q-card-section>
-        <q-card class="bg-primary text-white">
+        <q-card class="bg-primary text-white" v-ripple @click="handleClickRekap">
           <q-card-section>
             <div class="text-h6">{{ selectedKegiatan?.subkategori }}</div>
           </q-card-section>
@@ -39,11 +39,13 @@
 
 <script setup>
 import { useHelper } from 'src/composables/useHelper';
+import { useRoute, useRouter } from 'vue-router'
 import { useKegiatanService } from 'src/composables/useKegiatanService';
-import { ref, onBeforeMount, onMounted } from 'vue';
+import { ref, onBeforeMount, onMounted, onActivated } from 'vue';
 const Helper = useHelper()
-const Kegiatan = useKegiatanService();
+const router = useRouter();
 const kegiatans = ref(null)
+const Kegiatan = useKegiatanService();
 const selectedKegiatan = ref(null);
 const statusCounts = ref({
   Open: 0,
@@ -54,12 +56,13 @@ const statusCounts = ref({
 });
 
 onBeforeMount(async () => {
-  // console.log(kegiatans.value)
-  // kegiatans.value = await Kegiatan.getKegiatans();
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
   console.log(selectedKegiatan.value)
-  // console.log(kegiatans.value)
 })
+
+const handleClickRekap = async () => {
+  router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/list-level-1`)
+}
 </script>
 
 <style scoped>

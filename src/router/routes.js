@@ -79,6 +79,7 @@ const routes = [
             path: "kegiatans/:kegiatan_id",
             component: () => import("pages/DashboardKegiatanPage.vue"),
             meta: {
+              title: "Periode",
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -89,6 +90,7 @@ const routes = [
             path: "kegiatans/:kegiatan_id/list-level-1",
             component: () => import("pages/DaftarRekapLevel1Page.vue"),
             meta: {
+              title: "Daftar Wilayah",
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -97,8 +99,9 @@ const routes = [
           },
           {
             path: "kegiatans/:kegiatan_id/:level_1_id",
-            component: () => import("pages/DashboardKegiatanPage.vue"),
+            component: () => import("pages/DaftarResponden.vue"),
             meta: {
+              title: "Daftar Assignment",
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -141,7 +144,7 @@ const routes = [
         children: [
           {
             path: "kegiatans/:kegiatan_id/respondens/:responden_id",
-            component: () => import("pages/BerandaPage.vue"),
+            component: () => import("pages/FormPage.vue"),
             meta: {
               transition: {
                 enter: "animated slideInRight",

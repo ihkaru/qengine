@@ -3,7 +3,7 @@
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-btn dense flat round icon="arrow_back" @click="goBack" />
-        <q-toolbar-title>Periode</q-toolbar-title>
+        <q-toolbar-title>{{ pageTitle }}</q-toolbar-title>
         <q-btn dense flat round icon="info" />
         <q-btn dense flat round icon="more_vert" />
       </q-toolbar>
@@ -11,9 +11,9 @@
     <q-page-container>
       <router-view v-slot="{ Component }">
         <keep-alive>
-          <div :key="route.name">
+          <transition appear :enter-active-class="enterClass" :leave-active-class="leaveClass" mode="out-in">
             <component :is="Component" />
-          </div>
+          </transition>
         </keep-alive>
       </router-view>
     </q-page-container>
@@ -21,14 +21,49 @@
 </template>
 
 <script setup>
-import { ref, computed, Transition } from 'vue';
+import { useKegiatanService } from 'src/composables/useKegiatanService';
+import { ref, computed, Transition, watch, onBeforeMount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
+const selectedKegiatan = ref(null);
+const Kegiatan = useKegiatanService();
+
+// Page title state
+const pageTitle = ref(route.meta.title || 'Default Title');
+
+
+onBeforeMount(async () => {
+  selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
+  console.log(selectedKegiatan.value)
+})
+
+
+// Watch route changes to update the page title
+watch(route, (newRoute) => {
+  pageTitle.value = newRoute.meta.title || 'Default Title';
+});
+
+
+const enterClass = computed(() => {
+  console.log("called enter")
+  return route.meta.transition?.enter || 'animated fadeIn';
+});
+
+const leaveClass = computed(() => {
+  console.log("called leave")
+  return route.meta.transition?.leave || 'animated fadeOut';
+});
+
+
 
 
 const goBack = () => {
-  router.back();
+  if (route.meta.title == "Periode") router.push("/home/beranda");
+  else if (route.meta.title == "Daftar Wilayah") router.push(`/nav/kegiatans/${selectedKegiatan.value.id}`);
+  else if (route.meta.title == "Daftar Assignment") router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/list-level-1`);
+  else
+    router.back();
 };
 </script>

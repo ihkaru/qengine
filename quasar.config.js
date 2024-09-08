@@ -98,6 +98,9 @@ module.exports = configure(function (/* ctx */) {
         loading: {
           message: "Mohon tunggu",
         },
+        ripple: {
+          early: true,
+        },
       },
 
       // iconSet: 'material-icons', // Quasar icon set

@@ -40,8 +40,8 @@
           </div>
         </div>
         <br>
-        <q-card class="q-mt-sm" v-for="k in kegiatans?.data" :key="k.id">
-          <q-card-section @click="handleSelectedKegiatan(k)">
+        <q-card v-ripple @click="handleSelectedKegiatan(k)" class="q-mt-sm" v-for="k in kegiatans?.data" :key="k.id">
+          <q-card-section>
             <div class="text-h6">{{ k.nama + " " + k.tahun }}</div>
             <div class="text-subtitle2">{{ constants.LEVEL_PENDATAAN[k.level_pendataan] }}</div>
           </q-card-section>
