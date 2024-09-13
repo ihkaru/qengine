@@ -56,6 +56,9 @@
           <a href="#" class="text-primary">Kebijakan Privasi</a> kami
         </p>
         <p class="text-caption text-center">
+          Dikembangkan oleh BPS Kabupaten Mempawah
+        </p>
+        <p class="text-caption text-center">
           Heavily inspired by Fasih BPS!
         </p>
       </div>
