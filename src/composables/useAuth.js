@@ -1,63 +1,61 @@
 // src/composables/useAuth.js
-import { ref, watch } from 'vue'
-import localForage from 'src/boot/local-forage'
-import { api } from 'src/boot/axios'
-import { useQuasar } from 'quasar'
-import {decodeCredential} from "vue3-google-signin";
-import { useKegiatanService } from './useKegiatanService';
-
+import { ref, watch } from "vue";
+import localForage from "src/boot/local-forage";
+import { api } from "src/boot/axios";
+import { useQuasar } from "quasar";
+import { decodeCredential } from "vue3-google-signin";
+import { useKegiatanService } from "./useKegiatanService";
 
 export default function useAuth() {
-  const {handleLogoutKegiatanService,getIsLoggedIn,setIsLoggedIn} = useKegiatanService();
-  const token = ref(null)
+  const { handleLogoutKegiatanService, getIsLoggedIn, setIsLoggedIn } =
+    useKegiatanService();
+  const token = ref(null);
   const token_expires_at = ref(null);
   const show_success_login = ref(true);
   const $q = useQuasar();
 
-
   const setAuthHeader = (value) => {
     if (value) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${value}`
+      api.defaults.headers.common["Authorization"] = `Bearer ${value}`;
     } else {
-      delete api.defaults.headers.common['Authorization']
+      delete api.defaults.headers.common["Authorization"];
     }
-  }
-  const setShowSuccessLogin= (newSuccessLogin)=>{
+  };
+  const setShowSuccessLogin = (newSuccessLogin) => {
     show_success_login.value = newSuccessLogin;
-  }
-  const getShowSuccessLogin= ()=>{
-    return show_success_login.value ;
-  }
+  };
+  const getShowSuccessLogin = () => {
+    return show_success_login.value;
+  };
 
-  const isTokenExpired = async ()=>{
+  const isTokenExpired = async () => {
     try {
-    token.value = await getToken();
+      token.value = await getToken();
       if (!Boolean(token.value)) {
         return true;
       }
       if (!Boolean(token_expires_at.value)) {
         return true;
       }
-        return token_expires_at.value < currentTime;
-      } catch (error) {
-        return true;
+      return token_expires_at.value < currentTime;
+    } catch (error) {
+      return true;
     }
-  }
+  };
   const initToken = async () => {
-    let storedToken = await localForage.getItem('token')
-    let storedTokenExpiresAt = await localForage.getItem('token_expires_at')
+    let storedToken = await localForage.getItem("token");
+    let storedTokenExpiresAt = await localForage.getItem("token_expires_at");
     if (Boolean(storedToken)) {
-      token.value = storedToken
-      setAuthHeader(storedToken)
+      token.value = storedToken;
+      setAuthHeader(storedToken);
     }
-    if(Boolean(storedTokenExpiresAt)){
-      token_expires_at.value = storedTokenExpiresAt
+    if (Boolean(storedTokenExpiresAt)) {
+      token_expires_at.value = storedTokenExpiresAt;
     }
-  }
+  };
 
   const getTokenExpirationDate = async () => {
     try {
-
       if (!Boolean(token_expires_at.value)) {
         token_expires_at.value = await localForage.getItem("token_expires_at");
       }
@@ -65,113 +63,121 @@ export default function useAuth() {
       return date;
     } catch (error) {
       $q.notify({
-        message: "Gagal: "+error.message
-      })
+        message: "Gagal: " + error.message,
+      });
       return null;
     }
-  }
+  };
 
   const formatDate = (date) => {
-    if (!Boolean(date)) return 'N/A';
+    if (!Boolean(date)) return "N/A";
 
     const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      timeZoneName: 'short' // Includes the timezone abbreviation
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZoneName: "short", // Includes the timezone abbreviation
     };
 
     // Format the date using the Indonesian locale and the user's local timezone
-    const formattedDate = new Intl.DateTimeFormat('id-ID', options).format(date);
+    const formattedDate = new Intl.DateTimeFormat("id-ID", options).format(
+      date
+    );
 
-
-    return  formattedDate ;
-  }
+    return formattedDate;
+  };
 
   const getFormattedTokenExpirationDate = async () => {
     return formatDate(await getTokenExpirationDate());
-  }
+  };
 
   watch(token, (newToken) => {
     if (newToken) {
-      localForage.setItem('token', newToken)
-      setAuthHeader(newToken)
+      localForage.setItem("token", newToken);
+      setAuthHeader(newToken);
     } else {
-      localForage.removeItem('token')
-      setAuthHeader(null)
+      localForage.removeItem("token");
+      setAuthHeader(null);
     }
-  })
+  });
   watch(token_expires_at, (newTokenExpiresAt) => {
     if (Boolean(newTokenExpiresAt)) {
-      localForage.setItem('token_expires_at', newTokenExpiresAt)
-      setAuthHeader(newTokenExpiresAt)
+      localForage.setItem("token_expires_at", newTokenExpiresAt);
     } else {
-      localForage.removeItem('token_expires_at')
+      localForage.removeItem("token_expires_at");
     }
-  })
-  const getToken = async ()=>{
-    if(!Boolean(token.value)){
-      token.value = await localForage.getItem('token');
+  });
+  const getToken = async () => {
+    if (!Boolean(token.value)) {
+      token.value = await localForage.getItem("token");
     }
     return token.value;
-  }
+  };
 
-  const redirectIfTokenExpired = async ()=>{
+  const redirectIfTokenExpired = async () => {
     let storedToken = await getToken();
-    if(!storedToken){
-      return '/login';
+    if (!storedToken) {
+      return "/login";
     }
-    if(isTokenExpired()) return '/login';
-    return '/home/beranda';
-  }
+    if (isTokenExpired()) return "/login";
+    return "/home/beranda";
+  };
 
   const login = async (credential) => {
     try {
-    const decodedCredential = decodeCredential(credential);
-    setUser(decodedCredential);
-    setIsLoggedIn(true);
+      const decodedCredential = decodeCredential(credential);
+      setUser(decodedCredential);
+      setIsLoggedIn(true);
 
-    const response = await api.post('/login', { email: decodedCredential.email, credentials: credential })
-    token.value = response.data.access_token
-    token_expires_at.value = response.data.expires_at;
-
+      const response = await api.post("/login", {
+        email: decodedCredential.email,
+        credentials: credential,
+      });
+      token.value = response.data.access_token;
+      token_expires_at.value = response.data.expires_at;
     } catch (error) {
-      throw error
+      throw error;
     }
     setShowSuccessLogin(true);
-  }
+  };
 
   const logout = async () => {
     token.value = null;
     token_expires_at.value = null;
-    await localForage.setItem('user', null);
-    await localForage.setItem('token', null);
-    await localForage.setItem('token_expires_at', null);
-// const {handleLogoutKegiatanService} = useKegiatanService();
+    await localForage.setItem("user", null);
+    await localForage.setItem("token", null);
+    await localForage.setItem("token_expires_at", null);
+    // const {handleLogoutKegiatanService} = useKegiatanService();
     await handleLogoutKegiatanService();
     setIsLoggedIn(false);
     setShowSuccessLogin(false);
-  }
+  };
   const setUser = async (user) => {
-    await localForage.setItem('user', user);
-  }
+    await localForage.setItem("user", user);
+  };
   const user = async () => {
-    return await localForage.getItem('user');
-  }
+    return await localForage.getItem("user");
+  };
 
   // Initialize token on composable creation
-  initToken()
+  initToken();
 
   return {
     token,
-    login,logout,
+    login,
+    logout,
     getToken,
-    redirectIfTokenExpired, getFormattedTokenExpirationDate,isTokenExpired,getTokenExpirationDate,
-    user,setUser,
+    redirectIfTokenExpired,
+    getFormattedTokenExpirationDate,
+    isTokenExpired,
+    getTokenExpirationDate,
+    user,
+    setUser,
     initToken,
-    setShowSuccessLogin,getShowSuccessLogin
-  }
+    setShowSuccessLogin,
+    getShowSuccessLogin,
+  };
 }

@@ -266,7 +266,7 @@ const handleSyncKegiatan = async () => {
   let dismiss = $q.notify({
     progress: true,
     spinner: true,
-    message: 'Sync..',
+    message: 'Sync',
     color: "primary",
     textColor: "white",
     timeout: 5000

@@ -16,7 +16,7 @@
                 Catatan Elektronik Responden Aktual dan Sistematis <br>
                 Satu aplikasi untuk berbagai jenis pendataan.
               </p>
-              <p>Token Exist: {{ Boolean(token) }}</p>
+              <!-- <p>Token Exist: {{ Boolean(token) }}</p> -->
             </div>
           </q-carousel-slide>
           <q-carousel-slide :name="2" class="column no-wrap flex-center">
@@ -97,6 +97,7 @@ const handleLoginSuccess = async (response) => {
     const { credential } = response;
 
     await login(credential);
+    console.log("credential", credential);
     dismiss()
     router.push({ path: '/home/beranda' });
   } catch (error) {

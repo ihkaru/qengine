@@ -6,6 +6,25 @@
       </template>
     </q-input>
     <q-btn color="primary" label="SYNC ASSIGNMENT" class="q-mb-md" />
+    <q-card @click="handleSelectWilayah(w)" v-ripple flat bordered v-for="(w, index) in kegiatanData.wilayahKerjas"
+      :key="index" class="q-mb-md">
+      <q-card-section>
+        <div class="row q-col-gutter-sm">
+          <div class="col-4" v-for="(field, key) in wilayahKerjaAugment(w).fields" :key="key">
+            <div class="text-caption text-grey">{{ key }}</div>
+            <div>{{ field }}</div>
+          </div>
+        </div>
+      </q-card-section>
+      <!-- <q-card-section>
+        <div class="row q-col-gutter-md text-center">
+          <div class="col" v-for="(stat, key) in region.stats" :key="key">
+            <div class="text-h6">{{ stat }}</div>
+            <div class="text-caption">{{ key }}</div>
+          </div>
+        </div>
+      </q-card-section> -->
+    </q-card>
     <q-card @click="handleSelectWilayah" v-ripple flat bordered v-for="(region, index) in regions" :key="index"
       class="q-mb-md">
       <q-card-section>
@@ -30,15 +49,20 @@
 
 <script setup>
 import { useKegiatanService } from 'src/composables/useKegiatanService';
+import { useSyncService } from 'src/composables/useSyncService';
 import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 const selectedKegiatan = ref(null);
 const Kegiatan = useKegiatanService();
+const syncService = useSyncService();
+const selecetedLevel1 = ref(null);
 
+const kegiatanData = ref({});
 onBeforeMount(async () => {
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
-  console.log(selectedKegiatan.value)
+  kegiatanData.value = await syncService.getDataKegiatan(selectedKegiatan.value.id);
+  console.log(kegiatanData.value)
 })
 
 
@@ -80,9 +104,24 @@ const regions = ref([
     }
   }
 ]);
-
+const wilayahKerjaAugment = (wilayahKerja) => {
+  console.log("before embeded:", wilayahKerja);
+  if (!Boolean(wilayahKerja.fields?.PROVINSI)) {
+    wilayahKerja.fields = {};
+    wilayahKerja.fields.PROVINSI = wilayahKerja.sls.provinsi;
+    wilayahKerja.fields['KABUPATEN/KOTA'] = wilayahKerja.sls.kabkot;
+    wilayahKerja.fields.KECAMATAN = wilayahKerja.sls.kecamatan;
+    wilayahKerja.fields['DESA/KELURAHAN'] = wilayahKerja.sls.desa_kel;
+    wilayahKerja.fields['RT/SLS'] = wilayahKerja.sls.nama;
+  }
+  console.log("embeded:", wilayahKerja);
+  return wilayahKerja;
+}
 const handleSelectWilayah = async (wilayah) => {
-  router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/${wilayah.id ?? 'haha'}`)
+  selecetedLevel1.value = wilayah;
+  await Kegiatan.setSelectedLevel1(selecetedLevel1.value)
+  console.log("selectedLevel1", await Kegiatan.getSelectedLevel1());
+  router.push(`/nav/kegiatans/${selectedKegiatan.value.id}/${wilayah.sls_id ?? 'haha'}`)
 }
 </script>
 

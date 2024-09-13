@@ -5,7 +5,17 @@
         <q-btn dense flat round icon="arrow_back" @click="Back.goBack" />
         <q-toolbar-title>{{ pageTitle }}</q-toolbar-title>
         <q-btn dense flat round icon="info" />
-        <q-btn dense flat round icon="more_vert" />
+        <q-btn dense flat round icon="more_vert">
+          <q-menu>
+            <q-list>
+              <q-item @click="handleSync" clickable v-ripple v-close-popup style="min-width: 150px">
+                <q-item-section>
+                  Sync
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -21,11 +31,15 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar';
 import { useBackHandler } from 'src/composables/useBackHandler';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
+import { useSyncService } from 'src/composables/useSyncService';
 import { ref, computed, Transition, watch, onBeforeMount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
+const $q = useQuasar();
+const syncService = useSyncService();
 const router = useRouter();
 const route = useRoute();
 const selectedKegiatan = ref(null);
@@ -58,6 +72,26 @@ const leaveClass = computed(() => {
   return route.meta.transition?.leave || 'animated fadeOut';
 });
 
+const handleSync = async () => {
+
+  let dismiss = 0;
+  try {
+    dismiss = $q.notify({
+      spinner: true,
+      "message": "Sync",
+      "color": "blue",
+      "textColor": "white"
+    })
+    await syncService.syncKegiatan(selectedKegiatan.value.id)
+    dismiss();
+  } catch (e) {
+    dismiss();
+    $q.notify({
+      "message": e.message,
+      "type": "negative",
+    })
+  }
+}
 
 
 

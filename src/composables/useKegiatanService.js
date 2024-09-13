@@ -8,6 +8,8 @@ export function useKegiatanService() {
   const rekapitulasi_kegiatan = ref(null);
   const isLoggedIn = ref(null);
   const selectedKegiatan = ref(null);
+  const selectedLevel1 = ref(null);
+
   const getKegiatans = async () => {
     if (!Boolean(kegiatans.value)) {
       // kegiatans.value =
@@ -25,7 +27,7 @@ export function useKegiatanService() {
   };
   const setKegiatans = async (newKegiatans) => {
     await localForage.setItem("kegiatans", newKegiatans);
-    kegiatans.value = null;
+    kegiatans.value = newKegiatans;
   };
   const loadSelectedKegiatan = async () => {
     selectedKegiatan.value = JSON.parse(
@@ -39,12 +41,32 @@ export function useKegiatanService() {
     return selectedKegiatan.value;
   };
   const setSelectedKegiatan = async (newSelectedKegiatan) => {
-    selectedKegiatan.value = await newSelectedKegiatan;
+    selectedKegiatan.value = newSelectedKegiatan;
     console.log(selectedKegiatan.value);
     await localForage.setItem(
       "selectedKegiatan",
       JSON.stringify(selectedKegiatan.value)
     );
+  };
+  const loadSelectedLevel1 = async () => {
+    selectedLevel1.value = JSON.parse(
+      await localForage.getItem("selectedLevel1")
+    );
+  };
+  const getSelectedLevel1 = async () => {
+    if (!Boolean(selectedLevel1.value)) {
+      await loadSelectedLevel1();
+    }
+    return selectedLevel1.value;
+  };
+  const setSelectedLevel1 = async (newSelectedLevel1) => {
+    selectedLevel1.value = newSelectedLevel1;
+    console.log("selected:", selectedLevel1.value);
+    await localForage.setItem(
+      "selectedLevel1",
+      JSON.stringify(selectedLevel1.value)
+    );
+    console.log();
   };
   const getRekapitulasiKegiatan = async () => {
     if (!Boolean(rekapitulasi_kegiatan.value)) {
@@ -86,5 +108,8 @@ export function useKegiatanService() {
     getSelectedKegiatan,
     setSelectedKegiatan,
     loadSelectedKegiatan,
+    getSelectedLevel1,
+    setSelectedLevel1,
+    loadSelectedLevel1,
   };
 }

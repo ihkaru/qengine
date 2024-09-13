@@ -31,6 +31,9 @@
             <div class="text-subtitle2">Selesai {{ Helper.daysUntil(selectedKegiatan?.tgl_tutup) }} Hari Lagi - PPL
             </div>
           </q-card-section>
+          <q-card-section v-if="kegiatanData != null">
+            <div class="text-subtitle2">Data loaded</div>
+          </q-card-section>
         </q-card>
       </q-card-section>
     </q-card>
@@ -42,11 +45,18 @@ import { useHelper } from 'src/composables/useHelper';
 import { useRoute, useRouter } from 'vue-router'
 import { useKegiatanService } from 'src/composables/useKegiatanService';
 import { ref, onBeforeMount, onMounted, onActivated } from 'vue';
+import { useSyncService } from 'src/composables/useSyncService';
+import { useQuasar } from 'quasar';
+import useAuth from 'src/composables/useAuth';
+const $q = useQuasar();
 const Helper = useHelper()
 const router = useRouter();
+const syncService = useSyncService();
 const kegiatans = ref(null)
 const Kegiatan = useKegiatanService();
 const selectedKegiatan = ref(null);
+const auth = useAuth();
+const kegiatanData = ref(null);
 const statusCounts = ref({
   Open: 0,
   Submit: 0,
@@ -56,8 +66,31 @@ const statusCounts = ref({
 });
 
 onBeforeMount(async () => {
+  let dismiss = null;
+  if (!Boolean(kegiatanData.value)) {
+    try {
+      dismiss = $q.notify({
+        progress: true,
+        message: "Mengambil data",
+        spinner: true,
+        color: "blue",
+        textColor: "white",
+      });
+      kegiatanData.value = await syncService.handleLoadKegiatan();
+      dismiss();
+
+    } catch (e) {
+      dismiss = $q.notify({
+        type: 'negative',
+        progress: true,
+        message: e.message,
+      });
+    }
+
+  }
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
-  console.log(selectedKegiatan.value)
+
+  console.log(kegiatanData);
 })
 
 const handleClickRekap = async () => {
