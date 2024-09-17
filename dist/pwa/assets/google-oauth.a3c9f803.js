@@ -1,0 +1,1 @@
+import{R as r}from"./index.483fdc7e.js";var n=r(({app:a})=>new Promise((t,e)=>{const o=document.createElement("script");o.setAttribute("src","https://accounts.google.com/gsi/client"),o.onload=t,o.onerror=e,document.head.appendChild(o)}));export{n as default};
