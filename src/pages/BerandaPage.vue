@@ -188,9 +188,13 @@ const checkForUpdates = async () => {
         progress: true,
         timeout: 2000
       })
+      console.log("checking", navigator)
       const registration = await navigator.serviceWorker.ready;
+      console.log("checking", registration)
+
       await registration.update();
       if (registration.waiting) {
+        console.log("waiting")
         updateAvailable.value = true;
         notif()
         $q.notify({
@@ -209,6 +213,7 @@ const checkForUpdates = async () => {
       }
     } catch (error) {
       notif()
+      console.log("error:", error.message)
       $q.notify({
         message: 'Failed to check for updates. ' + error.message,
         color: 'negative'

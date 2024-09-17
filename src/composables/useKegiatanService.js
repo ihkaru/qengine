@@ -95,9 +95,10 @@ export function useKegiatanService() {
     await setKegiatans(null);
     await setRekapitulasiKegiatan(null);
   };
-  onMounted(async () => {
-    await initKegiatanService();
-  });
+  // onMounted(async () => {
+  //   await initKegiatanService();
+  // });
+  initKegiatanService();
   return {
     getKegiatans,
     getRekapitulasiKegiatan,

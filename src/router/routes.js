@@ -1,14 +1,6 @@
-// import useAuth from 'src/composables/useAuth';
+import useAuth from "src/composables/useAuth";
 
-// const authGuard = (to, from, next) => {
-//   const { token } = useAuth();
-
-//   if (!token.value) {
-//     next('/login'); // Redirect if not authenticated
-//   } else {
-//     next(); // Allow access if authenticated
-//   }
-// };
+const Auth = useAuth();
 
 const routes = [
   {
@@ -37,6 +29,7 @@ const routes = [
             path: "kegiatan",
             component: () => import("pages/SyncKegiatanPage.vue"),
             meta: {
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -47,6 +40,7 @@ const routes = [
             path: "surveyjs",
             component: () => import("pages/SyncSurveyJsPage.vue"),
             meta: {
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -55,6 +49,7 @@ const routes = [
           },
         ],
         meta: {
+          requiresAuth: true,
           transition: {
             enter: "animated slideInRight",
             leave: "animated slideOutLeft",
@@ -69,6 +64,7 @@ const routes = [
             path: "kegiatan-pilih",
             component: () => import("pages/FormSyncKegiatanPage.vue"),
             meta: {
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -80,6 +76,7 @@ const routes = [
             component: () => import("pages/DashboardKegiatanPage.vue"),
             meta: {
               title: "Periode",
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -91,6 +88,7 @@ const routes = [
             component: () => import("pages/DaftarRekapLevel1Page.vue"),
             meta: {
               title: "Daftar Wilayah",
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -102,6 +100,7 @@ const routes = [
             component: () => import("pages/DaftarResponden.vue"),
             meta: {
               title: "Daftar Assignment",
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -110,6 +109,7 @@ const routes = [
           },
         ],
         meta: {
+          requiresAuth: true,
           transition: {
             enter: "animated slideInRight",
             leave: "animated slideOutLeft",
@@ -125,6 +125,7 @@ const routes = [
             component: () => import("pages/BerandaPage.vue"),
             meta: {
               title: "Beranda",
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -133,6 +134,7 @@ const routes = [
           },
         ],
         meta: {
+          requiresAuth: true,
           transition: {
             enter: "animated slideInRight",
             leave: "animated slideOutLeft",
@@ -147,6 +149,7 @@ const routes = [
             path: "kegiatans/:kegiatan_id/respondens/:responden_id",
             component: () => import("pages/FormPage.vue"),
             meta: {
+              requiresAuth: true,
               transition: {
                 enter: "animated slideInRight",
                 leave: "animated slideOutLeft",
@@ -155,6 +158,7 @@ const routes = [
           },
         ],
         meta: {
+          requiresAuth: true,
           transition: {
             enter: "animated slideInRight",
             leave: "animated slideOutLeft",
@@ -175,6 +179,7 @@ const routes = [
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
     meta: {
+      requiresAuth: true,
       transition: {
         enter: "animated slideInRight",
         leave: "animated slideOutLeft",
@@ -182,5 +187,29 @@ const routes = [
     },
   },
 ];
+// Navigation guard
+function guard(to, from, next) {
+  console.log("Guarding");
+  Auth.initToken().then(() => {
+    Auth.isAuthenticated().then((value) => {
+      let isAuthenticated = value;
+      console.log("isAuthenticated:", value);
+      console.log("to.path:", to.path);
+      if (to.path === "/") {
+        next("/home/beranda");
+      } else if (to.meta.requiresAuth && !isAuthenticated) {
+        next("/login");
+      } else if (to.path === "/login" && isAuthenticated) {
+        next("/home/beranda");
+      } else {
+        next();
+      }
+    });
+  });
+}
 
+// Apply the guard to each route
+routes.forEach((route) => {
+  route.beforeEnter = guard;
+});
 export default routes;

@@ -76,7 +76,7 @@ const $q = useQuasar()
 
 
 const slide = ref(1)
-const { login, token, redirectIfTokenExpired, setUser, isTokenExpired, initToken } = useAuth()
+const { login, token, redirectIfTokenExpired, setUser, isTokenExpired, initToken, isAuthenticated } = useAuth()
 const router = useRouter()
 const tes = ref(1);
 onBeforeMount(() => {
@@ -84,7 +84,9 @@ onBeforeMount(() => {
 onMounted(async () => {
   initToken();
 
-  if (!isTokenExpired()) router.push('/home/beranda');
+  // isAuthenticated().then((value)=>{
+  //   if (!value) router.push('/home/beranda');
+  // })
 })
 
 

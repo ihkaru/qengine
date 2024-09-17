@@ -12,7 +12,7 @@ export default function useAuth() {
   const token = ref(null);
   const token_expires_at = ref(null);
   const show_success_login = ref(true);
-  const $q = useQuasar();
+  // const $q = useQuasar();
 
   const setAuthHeader = (value) => {
     if (value) {
@@ -28,9 +28,18 @@ export default function useAuth() {
     return show_success_login.value;
   };
 
+  const isAuthenticated = async () => {
+    return !(await isTokenExpired());
+  };
+
   const isTokenExpired = async () => {
     try {
       token.value = await getToken();
+      token_expires_at.value = await getTokenExpirationDate();
+      let currentTime = new Date();
+      console.log("token:", token.value);
+      console.log("expires at:", token_expires_at.value);
+      console.log("expires at result:", token_expires_at.value < currentTime);
       if (!Boolean(token.value)) {
         return true;
       }
@@ -39,6 +48,7 @@ export default function useAuth() {
       }
       return token_expires_at.value < currentTime;
     } catch (error) {
+      console.log("error:", error.message);
       return true;
     }
   };
@@ -52,6 +62,7 @@ export default function useAuth() {
     if (Boolean(storedTokenExpiresAt)) {
       token_expires_at.value = storedTokenExpiresAt;
     }
+    console.log("init token", await isAuthenticated());
   };
 
   const getTokenExpirationDate = async () => {
@@ -62,9 +73,6 @@ export default function useAuth() {
       const date = new Date(token_expires_at.value);
       return date;
     } catch (error) {
-      $q.notify({
-        message: "Gagal: " + error.message,
-      });
       return null;
     }
   };
@@ -179,5 +187,6 @@ export default function useAuth() {
     initToken,
     setShowSuccessLogin,
     getShowSuccessLogin,
+    isAuthenticated,
   };
 }
