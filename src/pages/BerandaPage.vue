@@ -40,6 +40,10 @@
           </div>
         </div>
         <br>
+        <div>
+          <q-btn :label="updateAvailable ? 'Update Available' : 'Check for Updates'"
+            :color="updateAvailable ? 'primary' : 'secondary'" @click="checkForUpdates" />
+        </div>
         <q-card v-ripple @click="handleSelectedKegiatan(k)" class="q-mt-sm" v-for="k in kegiatans?.data" :key="k.id">
           <q-card-section>
             <div class="text-h6">{{ k.nama + " " + k.tahun }}</div>
@@ -144,7 +148,7 @@ import { useConstants } from 'src/composables/useConstants';
 import { useBackHandler } from 'src/composables/useBackHandler';
 
 const { isOnline } = useOnlineStatus();
-
+const updateAvailable = ref(false);
 const { getKegiatans, getRekapitulasiKegiatan, initKegiatanService, setSelectedKegiatan } = useKegiatanService();
 const { user, token, initToken, logout, redirectIfTokenExpired, getFormattedTokenExpirationDate, getTokenExpirationDate, isTokenExpired, getShowSuccessLogin, setShowSuccessLogin } = useAuth();
 
@@ -163,6 +167,43 @@ const showSuccessLogin = ref(false);
 const pageKey = ref(0);
 const redirect = ref(true);
 
+const checkForUpdates = async () => {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.update();
+
+      if (registration.waiting) {
+        updateAvailable.value = true;
+        $q.notify({
+          message: 'A new version is available. Click update to apply it.',
+          color: 'info',
+          actions: [
+            { label: 'Update', color: 'white', handler: () => applyUpdate(registration) }
+          ]
+        });
+      } else {
+        $q.notify({
+          message: 'Your app is up to date.',
+          color: 'positive'
+        });
+      }
+    } catch (error) {
+      console.error('Error checking for updates:', error);
+      $q.notify({
+        message: 'Failed to check for updates.',
+        color: 'negative'
+      });
+    }
+  }
+};
+
+const applyUpdate = (registration) => {
+  if (registration.waiting) {
+    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+  }
+  window.location.reload();
+};
 const updatePage = () => {
   pageKey.value += 1;
 }
@@ -179,7 +220,11 @@ onBeforeMount(async () => {
 })
 onMounted(async () => {
   // initToken();
-
+  if ('serviceWorker' in navigator && isOnline.value) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+  }
   showSuccessLogin.value = getShowSuccessLogin();
   console.log("showSuccessLogin:", showSuccessLogin.value);
   try {
