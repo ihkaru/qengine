@@ -124,7 +124,11 @@
       </q-tab-panel>
     </q-tab-panels>
 
-
+    <div class="version-info text-grey">
+      <q-item-label class="text-center">
+        {{ appVersion }}
+      </q-item-label>
+    </div>
     <q-footer>
       <q-tabs v-model="panel" no-caps align="justify" active-color="primary" indicator-color="primary"
         class="bg-grey-3 text-grey" flat>
@@ -146,12 +150,15 @@ import { useOnlineStatus } from 'src/composables/useOnlineStatus';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
 import { useConstants } from 'src/composables/useConstants';
 import { useBackHandler } from 'src/composables/useBackHandler';
+import { useUtils } from 'src/composables/useUtils';
 
 const { isOnline } = useOnlineStatus();
 const updateAvailable = ref(false);
 const { getKegiatans, getRekapitulasiKegiatan, initKegiatanService, setSelectedKegiatan } = useKegiatanService();
 const { user, token, initToken, logout, redirectIfTokenExpired, getFormattedTokenExpirationDate, getTokenExpirationDate, isTokenExpired, getShowSuccessLogin, setShowSuccessLogin } = useAuth();
 
+const Utils = useUtils();
+const appVersion = ref('')
 const constants = useConstants();
 const activeUser = ref({});
 const route = useRoute();
@@ -197,7 +204,6 @@ const checkForUpdates = async () => {
     }
   }
 };
-
 const applyUpdate = (registration) => {
   if (registration.waiting) {
     registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -220,6 +226,8 @@ onBeforeMount(async () => {
 })
 onMounted(async () => {
   // initToken();
+  appVersion.value = Utils.getAppVersion();
+
   if ('serviceWorker' in navigator && isOnline.value) {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
@@ -353,5 +361,19 @@ const handleSelectedKegiatan = async (kegiatan) => {
 
 .pulse-animation {
   animation: pulse 5s infinite;
+}
+
+.version-info {
+  position: fixed;
+  bottom: 100px;
+  right: 5px;
+  /* Adjust this to fit above the footer */
+  width: 100%;
+  text-align: center;
+  z-index: -1;
+  padding: 0;
+  /* Ensure it's above the main content */
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Optional, to improve readability */
 }
 </style>
