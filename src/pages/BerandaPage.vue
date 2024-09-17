@@ -177,11 +177,22 @@ const redirect = ref(true);
 const checkForUpdates = async () => {
   if ('serviceWorker' in navigator) {
     try {
+      if (!isOnline) {
+        throw Error("Anda sedang offline");
+      }
+      const notif = $q.notify({
+        type: 'ongoing',
+        color: 'blue',
+        textColor: 'white',
+        message: 'Sedang mengecek update..',
+        progress: true,
+        timeout: 2000
+      })
       const registration = await navigator.serviceWorker.ready;
       await registration.update();
-
       if (registration.waiting) {
         updateAvailable.value = true;
+        notif()
         $q.notify({
           message: 'A new version is available. Click update to apply it.',
           color: 'info',
@@ -190,15 +201,16 @@ const checkForUpdates = async () => {
           ]
         });
       } else {
+        notif()
         $q.notify({
           message: 'Your app is up to date.',
           color: 'positive'
         });
       }
     } catch (error) {
-      console.error('Error checking for updates:', error);
+      notif()
       $q.notify({
-        message: 'Failed to check for updates.',
+        message: 'Failed to check for updates. ' + error.message,
         color: 'negative'
       });
     }
