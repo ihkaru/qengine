@@ -4,8 +4,8 @@
       <q-toolbar>
         <q-toolbar-title style="font-size: medium; padding-left: 20px;padding-top: 15px;padding-bottom: 15px;"
           class="text-black text-bold">
-          <div class="my-0">SAKERNAS AGS 2024 - PENDATAAN</div>
-          <div class="m-0" style="font-size: x-small;">FormEngine-0.0.1 🚀</div>
+          <div class="my-0">{{ selectedKegiatan?.id }}</div>
+          <div class="m-0" style="font-size: x-small;">Template: {{ masterKegiatan?.template?.versi }} 🚀</div>
         </q-toolbar-title>
 
         <q-toggle v-model="$q.dark.isActive" checked-icon="dark_mode" unchecked-icon="light_mode" color="black" />
@@ -31,8 +31,10 @@
 import { useViewStore } from 'src/stores/view.js';
 import EssentialLink from 'components/EssentialLink.vue'
 import { useQuasar } from 'quasar';
-const $q = useQuasar()
+import { onBeforeMount, onMounted, ref } from 'vue';
 
+
+const $q = useQuasar()
 const view = useViewStore();
 const linksList = [
   {
@@ -78,4 +80,25 @@ const linksList = [
     link: 'https://awesome.quasar.dev'
   }
 ]
+
+onBeforeMount(async () => {
+  await initSelectedKegiatan();
+  await initMasterKegiatan();
+})
+
+import { useKegiatanService } from 'src/composables/useKegiatanService';
+const Kegiatan = useKegiatanService()
+const selectedKegiatan = ref(null);
+const initSelectedKegiatan = async () => {
+  selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
+  console.log("selectedKegiatan", selectedKegiatan.value)
+}
+
+import { useSyncService } from 'src/composables/useSyncService';
+const masterKegiatan = ref({});
+const SyncKegiatan = useSyncService();
+const initMasterKegiatan = async () => {
+  masterKegiatan.value = await SyncKegiatan.getDataKegiatan(selectedKegiatan.value.id);
+  console.log("masterKegiatan", masterKegiatan.value);
+}
 </script>

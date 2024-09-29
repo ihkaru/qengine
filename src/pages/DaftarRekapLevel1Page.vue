@@ -62,7 +62,7 @@ const kegiatanData = ref({});
 onBeforeMount(async () => {
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
   kegiatanData.value = await syncService.getDataKegiatan(selectedKegiatan.value.id);
-  console.log(kegiatanData.value)
+  console.log("hahaha", kegiatanData.value, selectedKegiatan.value.id)
 })
 
 

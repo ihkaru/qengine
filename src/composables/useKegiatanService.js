@@ -68,6 +68,41 @@ export function useKegiatanService() {
     );
     console.log();
   };
+  const selectedResponden = ref(null);
+  const loadSelectedResponden = async () => {
+    selectedResponden.value = JSON.parse(
+      await localForage.getItem("selectedResponden")
+    );
+  };
+  const getSelectedResponden = async () => {
+    if (!Boolean(selectedResponden.value)) {
+      await loadSelectedResponden();
+    }
+    return selectedResponden.value;
+  };
+  const setSelectedResponden = async (newSelectedResponden) => {
+    selectedResponden.value = newSelectedResponden;
+    console.log("selected:", selectedResponden.value);
+    await localForage.setItem(
+      "selectedResponden",
+      JSON.stringify(selectedResponden.value)
+    );
+    console.log();
+  };
+  const selectedMode = ref(null);
+  const loadSelectedMode = async () => {
+    selectedMode.value = await localForage.getItem("selectedMode");
+  };
+  const getSelectedMode = async () => {
+    if (!Boolean(selectedMode.value)) {
+      await loadSelectedMode();
+    }
+    return selectedMode.value;
+  };
+  const setSelectedMode = async (newSelectedMode) => {
+    selectedMode.value = newSelectedMode;
+    await localForage.setItem("selectedMode", newSelectedMode);
+  };
   const getRekapitulasiKegiatan = async () => {
     if (!Boolean(rekapitulasi_kegiatan.value)) {
       // kegiatans.value =
@@ -112,5 +147,11 @@ export function useKegiatanService() {
     getSelectedLevel1,
     setSelectedLevel1,
     loadSelectedLevel1,
+    getSelectedMode,
+    setSelectedMode,
+    loadSelectedMode,
+    getSelectedResponden,
+    setSelectedResponden,
+    loadSelectedResponden,
   };
 }

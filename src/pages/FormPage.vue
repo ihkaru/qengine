@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <SurveyComponent :model="survey" />
+    <SurveyComponent v-if="survey" :model="survey" />
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
       <q-fab icon="touch_app" direction="up" color="blue-10" external-label>
         <q-fab-action external-label color="warning" icon="settings_backup_restore" label="Muat ulang"
@@ -35,9 +35,12 @@
 import 'survey-core/defaultV2.min.css';
 import { Model } from 'survey-core';
 import { useQuasar } from 'quasar'
-import { onBeforeMount, onMounted, ref } from 'vue';
+import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
+import { useSyncService } from 'src/composables/useSyncService';
+import { useAssignmentService } from 'src/composables/useAssignmentService';
+import useAuth from 'src/composables/useAuth';
 const $q = useQuasar()
 const router = useRouter()
 const route = useRoute()
@@ -45,16 +48,91 @@ const approval = ref(false);
 const toggleApproval = function () {
   approval.value = !approval.value;
 }
-
-const selectedKegiatan = ref(null);
 const Kegiatan = useKegiatanService();
 
-onBeforeMount(async () => {
+
+
+const selectedKegiatan = ref(null);
+const initSelectedKegiatan = async () => {
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
-  console.log(selectedKegiatan.value)
+}
+
+const selectedLevel1 = ref(null)
+const initSelectedLevel1 = async () => {
+  selectedLevel1.value = await Kegiatan.getSelectedLevel1();
+}
+const masterKegiatan = ref({});
+const SyncKegiatan = useSyncService();
+const initMasterKegiatan = async () => {
+  masterKegiatan.value = await SyncKegiatan.getDataKegiatan(selectedKegiatan.value.id);
+  console.log("masterKegiatan", masterKegiatan.value, selectedKegiatan.value.id);
+}
+const survey = ref(null);
+watch(survey, (newSurvey) => {
+  if (newSurvey) {
+    newSurvey.onValueChanged.add(() => {
+      console.log("value changed")
+      // saveSurvey(newSurvey); // Auto-save on change
+      survey.value = newSurvey;
+    });
+  }
+});
+const initSurveyTemplate = async () => {
+  console.log("masterKegiatan", masterKegiatan.value)
+  console.log("selectedMode3", selectedMode.value)
+  console.log("prefiller", selectedResponden.value.respondens.data)
+  survey.value = new Model(masterKegiatan.value.template.template)
+
+  // isi form jika edit
+  if (selectedMode.value == 'editAssignment') {
+    survey.value.data = selectedResponden.value.respondens.data;
+    console.log("prefill3", survey.value.data)
+  }
+
+  // survey.value.onComplete.add(function (result) {
+  //   if (!navigator.onLine) {
+
+  //     window.localStorage.setItem('surveyResults', JSON.stringify(result.data));
+  //     alert('Data disimpan secara lokal');
+  //   } else {
+  //     alertResults(result);
+  //   }
+  // });
+}
+
+const Auth = useAuth()
+const activeUser = ref(null);
+const initAuth = async () => {
+  activeUser.value = await Auth.user()
+}
+
+const selectedMode = ref(null);
+const initSelectedMode = async () => {
+  selectedMode.value = await Kegiatan.getSelectedMode();
+  console.log("selectedMode.value", selectedMode.value);
+}
+
+const selectedResponden = ref(null)
+const initSelectedResponden = async () => {
+  selectedResponden.value = await Kegiatan.getSelectedResponden();
+  console.log("prefiller1", selectedResponden.value)
+  if (typeof selectedResponden.value.respondens.data == 'string') {
+    selectedResponden.value.respondens.data = JSON.parse(selectedResponden.value.respondens.data);
+  }
+}
+onBeforeMount(async () => {
+  await initSelectedMode();
+  await initSelectedKegiatan();
+  await initMasterKegiatan();
+  await initSelectedResponden();
+  await initSurveyTemplate();
+  await initSelectedLevel1();
+  // await initKegiatan();
+  await initAuth();
 })
 onMounted(async () => {
-  if (route.query.mode == 'tambahAssignment') {
+
+  if (selectedMode.value == 'tambahAssignment') {
     // Trigger the notification
     $q.notify({
       progress: true,
@@ -65,7 +143,7 @@ onMounted(async () => {
       timeout: 2000
     })
   }
-  if (route.query.mode == 'editAssignment') {
+  if (selectedMode.value == 'editAssignment') {
     // Trigger the notification
     $q.notify({
       progress: true,
@@ -86,7 +164,8 @@ const alertResults = (sender) => {
   //   sender.data
   // )
 }
-const simpanDanKeluar = () => {
+const simpanDanKeluar = async () => {
+  await saveSurvey();
   router.push({
     path: `/nav/kegiatans/${selectedKegiatan.value.id}/haha`,
     query: {
@@ -96,45 +175,78 @@ const simpanDanKeluar = () => {
 }
 
 
+const isOnline = ref(navigator.onLine);
 
-const json = {
-  questions: [
-    {
-      type: 'text',
-      name: 'kepalaRumahTangga',
-      title: 'Nama Kepala Rumah Tangga',
-      isRequired: true
-    },
-    {
-      type: 'paneldynamic',
-      name: 'anggotaRumahTangga',
-      title: 'Anggota Rumah Tangga Lainnya',
-      renderMode: 'progressTop',
-      panelCount: 1,
-      panelAddText: 'Tambahkan Anggota Rumah Tangga',
-      panelRemoveText: 'Hapus Anggota Rumah Tangga',
-      templateTitle: 'Anggota #{panelIndex}',
-      templateElements: [
-        {
-          type: 'text',
-          name: 'namaAnggota',
-          title: 'Nama Anggota',
-          isRequired: true
-        }
-      ]
+const fetchSurveyTemplate = async () => {
+  try {
+    // First, try to load from localStorage
+    const localData = localStorage.getItem('surveyData');
+    if (localData) {
+      survey.value = new Model(JSON.parse(localData));
+      return;
     }
-  ]
-}
-const survey = new Model(json);
-survey.onComplete.add(function (result) {
-  if (!navigator.onLine) {
 
-    window.localStorage.setItem('surveyResults', JSON.stringify(result.data));
-    alert('Data disimpan secara lokal');
-  } else {
-    alertResults(result);
+    // If not in localStorage, fetch from API
+    const response = await fetch('YOUR_API_ENDPOINT');
+    const jsonTemplate = await response.json();
+    survey.value = new Model(jsonTemplate);
+  } catch (error) {
+    console.error('Error fetching survey template:', error);
   }
-});
+};
+
+const Assignment = useAssignmentService();
+const saveSurvey = async () => {
+  let surveyData = {
+    json: survey.value.toJSON(),
+    data: survey.value.data
+  };
+  console.log("surveyValue", survey.value);
+  console.log("surveyData", surveyData);
+  let assignment = null;
+  console.log("selectedMode.value", selectedMode.value)
+  if (selectedMode.value == 'tambahAssignment') {
+    assignment = await Assignment.addNewAssignment(activeUser.value, masterKegiatan.value, selectedLevel1.value, surveyData)
+  } else if (selectedMode.value == "editAssignment") {
+    assignment = await Assignment.editAssignment(surveyData, selectedResponden.value)
+  }
+  await Assignment.saveAssignmentToLocal(assignment)
+  if (survey.value) {
+    // localStorage.setItem('surveyData', JSON.stringify(surveyData));
+    // alert('Survey saved locally');
+  }
+};
+
+const submitSurvey = async () => {
+  if (survey.value && isOnline.value) {
+    const surveyData = survey.value.toJSON();
+    try {
+      const response = await fetch('YOUR_SUBMIT_API_ENDPOINT', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(surveyData),
+      });
+      if (response.ok) {
+        alert('Survey submitted successfully');
+        localStorage.removeItem('surveyData'); // Clear local storage after successful submission
+      } else {
+        throw new Error('Failed to submit survey');
+      }
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      alert('Failed to submit survey. Please try again later.');
+    }
+  }
+};
+
+const updateOnlineStatus = () => {
+  isOnline.value = navigator.onLine;
+};
+
+
+
 </script>
 
 <style scoped></style>

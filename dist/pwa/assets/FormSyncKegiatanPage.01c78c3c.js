@@ -1,1 +1,0 @@
-import{Q as e}from"./QPage.7e093402.js";import{_ as a}from"./plugin-vue_export-helper.21dcd24c.js";import{b as r,i as t,w as o,p as c}from"./index.483fdc7e.js";const s={},n=c("h1",null,"Form Sync Kegiatan Page",-1);function _(f,i){return r(),t(e,{class:"flex flex-center"},{default:o(()=>[n]),_:1})}var d=a(s,[["render",_]]);export{d as default};

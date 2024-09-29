@@ -35,7 +35,7 @@
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
-            <div class="text-left">This is expand slot for row above: {{ props.row.namaKRT }}.</div>
+            <div class="text-left">This is expand slot for row above.</div>
             <div>
               <div>Status: APPROVED BY PML</div>
               <div>User saat ini arinif</div>
@@ -54,7 +54,7 @@
         <q-fab-action external-label color="warning" icon="done" label="Tandai wilayah telah selesai"
           label-position="left" />
         <q-fab-action external-label color="grey" icon="add" label="Tambah Assignment" label-position="left"
-          @click="onTambahAssignment" />
+          :disable="!canTambahAssignment" @click="onTambahAssignment" />
       </q-fab>
     </q-page-sticky>
     <q-dialog v-model="openAksiDialog" :position="aksiDialogPosition">
@@ -84,15 +84,16 @@
 
 <script setup>
 import { useQuasar } from 'quasar';
+import { useAssignmentService } from 'src/composables/useAssignmentService';
 import { useKegiatanService } from 'src/composables/useKegiatanService';
 import { useSyncService } from 'src/composables/useSyncService';
-import { onBeforeMount, onMounted, ref } from 'vue';
+import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 const router = useRouter()
 const route = useRoute()
 const $q = useQuasar()
 const SyncService = useSyncService();
-const kegiatanData = ref({});
+const masterKegiatan = ref({});
 
 const filter = ref('')
 const entriesPerPage = ref(50);
@@ -128,41 +129,77 @@ const aksiDialogPosition = ref('bottom')
 const columns = ref([]);
 const visible_columns = ref([]);
 const assignments = ref([]);
+const keyColumn = () => {
+  return visible_columns.value[0];
+}
 const rowKey = (row) => {
-  console.log("row", row);
-  return row[visible_columns.value[0]]
+  console.log(row)
+  return row[keyColumn()];
 }
 
 const prepareTable = async () => {
-  console.log("kegiatanData", kegiatanData.value);
-  let kolom_wajib = JSON.parse(kegiatanData.value.template.kolom_wajib);
+  console.log("masterKegiatan", masterKegiatan.value);
+  let kolom_wajib = JSON.parse(masterKegiatan.value.template.kolom_wajib);
   columns.value = kolom_wajib.kolom_wajib;
   visible_columns.value = kolom_wajib.visible_columns;
+
   console.log("column", columns.value)
   console.log("visible", visible_columns.value)
-  console.log("assignment", assignments.value)
-  kegiatanData.value.assignments.forEach(element => {
+  console.log("assignment1", assignments.value)
+  console.log("selectedLevel1.value.sls_id", selectedLevel1.value.sls_id)
+
+  masterKegiatan.value.assignments.forEach(element => {
     console.log("selectedLevel1:", selectedLevel1.value.sls_id)
+    console.log("elements1", element)
     console.log("sls_id:", element.respondens.sls_id)
     if (element.respondens.sls_id == selectedLevel1.value.sls_id) {
       if (typeof element.respondens.data == 'string') {
         element.respondens.data = JSON.parse(element.respondens.data);
       }
       assignments.value.push(element.respondens.data);
+      console.log('element.respondens.data', element.respondens.data)
     };
   });
+  console.log("assignment before", assignments.value)
+  // console.log("",assignments.value)
   assignments.value = assignments.value.filter(element => element !== null);
+  console.log("assignment after", assignments.value)
+
 }
 
+const Assignment = useAssignmentService();
+const canTambahAssignment = ref(null);
+const initAssignment = async () => {
+  canTambahAssignment.value = await Assignment.canTambahAssignment(masterKegiatan.value);
+}
+
+const selectedMode = ref(null)
+const initSelectedMode = async () => {
+  selectedMode.value = await Kegiatan.getSelectedMode();
+}
+const selectedResponden = ref(null)
+const initSelectedResponden = async () => {
+  selectedResponden.value = await Kegiatan.getSelectedResponden();
+}
 onBeforeMount(async () => {
   selectedKegiatan.value = await Kegiatan.getSelectedKegiatan();
   selectedLevel1.value = await Kegiatan.getSelectedLevel1();
-  kegiatanData.value = await SyncService.getDataKegiatan(selectedKegiatan.value.id);
-  await prepareTable();
+  masterKegiatan.value = await SyncService.getDataKegiatan(selectedKegiatan.value.id);
+  await initSelectedMode();
+  await initAssignment();
+  await initSelectedResponden();
   console.log("selectedKegiatan:", selectedKegiatan.value)
+  console.log("masterKegiatan1:", masterKegiatan.value)
+  await prepareTable();
 
 })
 
+watch(masterKegiatan, async (newMasterKegiatan) => {
+  if (newMasterKegiatan.value) {
+    console.log("watch:", newMasterKegiatan.value);
+    await SyncService.setDataKegiatan(newMasterKegiatan.value, selectedKegiatan.value.id);
+  }
+})
 
 onMounted(async () => {
   if (route.query.isSaveSuccess == 'true') {
@@ -178,29 +215,56 @@ onMounted(async () => {
   }
 })
 
-const openAksi = (pos, row) => {
+const openAksi = async (pos, row) => {
   selectedRow.value = row
+  selectedResponden.value = masterKegiatan.value.assignments.find((e) => {
+    console.log("e.respondens.data1", e.respondens.data)
+    let res = e.respondens.data;
+    if (typeof e.respondens.data == 'string') {
+      res = JSON.parse(e.respondens.data);
+    }
+    return res[keyColumn()] == rowKey(selectedRow.value)
+  })
+  await Kegiatan.setSelectedResponden(selectedResponden.value);
+  console.log("selected responden", selectedResponden.value)
+  console.log("selectedRow", selectedRow.value)
+  console.log("selectedRowKey", rowKey(row));
   aksiDialogPosition.value = pos
   openAksiDialog.value = true
 }
 const onAksiDialog = (aksi) => {
   if (aksi == "buka") onBukaForm();
 }
-const onBukaForm = () => {
+
+const onBukaForm = async () => {
+
+  let mode = 'editAssignment';
+  selectedMode.value = mode
+  await Kegiatan.setSelectedMode(selectedMode.value);
+  selectedMode.value = await Kegiatan.getSelectedMode()
+
   router.push(
     {
-      path: `/form/kegiatans/${selectedKegiatan.value.id}/respondens/haha`,
+      path: `/form/kegiatans/${selectedKegiatan.value.id}/respondens/1`,
       query: {
         mode: `editAssignment`
       }
     }
   )
 }
-const onTambahAssignment = () => {
+const onTambahAssignment = async () => {
+  if (!Boolean(canTambahAssignment.value)) {
+    return;
+  }
+  let mode = 'tambahAssignment';
+  selectedMode.value = mode
+  await Kegiatan.setSelectedMode(selectedMode.value);
+  selectedMode.value = await Kegiatan.getSelectedMode()
+  if (!Boolean(selectedMode.value)) return;
   router.push({
-    path: `/form/kegiatans/${selectedKegiatan.value.id}/respondens/haha`,
+    path: `/form/kegiatans/${selectedKegiatan.value.id}/respondens/1`,
     query: {
-      mode: `tambahAssignment`
+      mode: selectedMode.value
     }
   })
 }
