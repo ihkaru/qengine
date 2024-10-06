@@ -80,7 +80,7 @@ watch(survey, (newSurvey) => {
 const initSurveyTemplate = async () => {
   console.log("masterKegiatan", masterKegiatan.value)
   console.log("selectedMode3", selectedMode.value)
-  console.log("prefiller", selectedResponden.value.respondens.data)
+  console.log("prefiller", selectedResponden.value?.respondens?.data)
   survey.value = new Model(masterKegiatan.value.template.template)
 
   // isi form jika edit
@@ -116,7 +116,7 @@ const selectedResponden = ref(null)
 const initSelectedResponden = async () => {
   selectedResponden.value = await Kegiatan.getSelectedResponden();
   console.log("prefiller1", selectedResponden.value)
-  if (typeof selectedResponden.value.respondens.data == 'string') {
+  if (typeof selectedResponden.value?.respondens?.data == 'string') {
     selectedResponden.value.respondens.data = JSON.parse(selectedResponden.value.respondens.data);
   }
 }
@@ -124,7 +124,9 @@ onBeforeMount(async () => {
   await initSelectedMode();
   await initSelectedKegiatan();
   await initMasterKegiatan();
-  await initSelectedResponden();
+  if (selectedMode.value == 'tambahAssignment') {
+    await initSelectedResponden();
+  }
   await initSurveyTemplate();
   await initSelectedLevel1();
   // await initKegiatan();
